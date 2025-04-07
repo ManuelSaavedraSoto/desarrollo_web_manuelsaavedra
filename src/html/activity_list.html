@@ -31,7 +31,7 @@
                 <td>Cultura</td>
                 <td>Juan Pérez</td>
                 <td>10</td>
-                <td><button onclick="toggleWindow(1)">Ver Más</button></td>
+                <td><button onclick="window.location.href='activity_0.html'">Ver Más</button></td>
             </tr>
             <tr>
                 <td>03-01-2025</td>
@@ -41,7 +41,7 @@
                 <td>Arte</td>
                 <td>María López</td>
                 <td>15</td>
-                <td><button onclick="toggleWindow(2)">Ver Más</button></td>
+                <td><button onclick="window.location.href='activity_1.html'">Ver Más</button></td>
             </tr>
             <tr>
                 <td>05-01-2025</td>
@@ -51,7 +51,7 @@
                 <td>Música</td>
                 <td>Carlos Díaz</td>
                 <td>8</td>
-                <td><button onclick="toggleWindow(3)">Ver Más</button></td>
+                <td><button onclick="window.location.href='activity_2.html'">Ver Más</button></td>
             </tr>
             <tr>
                 <td>07-01-2025</td>
@@ -61,7 +61,7 @@
                 <td>Deporte</td>
                 <td>Ana Gómez</td>
                 <td>12</td>
-                <td><button onclick="toggleWindow(4)">Ver Más</button></td>
+                <td><button onclick="window.location.href='activity_3.html'">Ver Más</button></td>
             </tr>
             <tr>
                 <td>09-01-2025</td>
@@ -71,33 +71,10 @@
                 <td>Educación</td>
                 <td>Pedro Ruiz</td>
                 <td>20</td>
-                <td><button onclick="toggleWindow(5)">Ver Más</button></td>
+                <td><button onclick="window.location.href='activity_4.html'">Ver Más</button></td>
             </tr>
         </tbody>
     </table>
-
-    <div id="overlay" class="overlay" onclick="toggleWindow('')"></div>
-
-    <div id="window-1" class="floating-window">
-        <p>Detalles de la actividad 1</p>
-        <button onclick="toggleWindow(1)">Cerrar</button>
-    </div>
-    <div id="window-2" class="floating-window">
-        <p>Detalles de la actividad 2</p>
-        <button onclick="toggleWindow(2)">Cerrar</button>
-    </div>
-    <div id="window-3" class="floating-window">
-        <p>Detalles de la actividad 3</p>
-        <button onclick="toggleWindow(3)">Cerrar</button>
-    </div>
-    <div id="window-4" class="floating-window">
-        <p>Detalles de la actividad 4</p>
-        <button onclick="toggleWindow(4)">Cerrar</button>
-    </div>
-    <div id="window-5" class="floating-window">
-        <p>Detalles de la actividad 5</p>
-        <button onclick="toggleWindow(5)">Cerrar</button>
-    </div>
 
     <button onclick="window.location.href='index.html'" style="margin-top: 20px;">Volver a Inicio</button>
 </body>
