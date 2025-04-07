@@ -68,7 +68,85 @@ let region_comuna = {
     ]
 };
 
-const maxPhotos = 5;
+function enableComuna(event) {
+    const comunaSelect = document.getElementById('comuna-select');
+
+    comunaSelect.disabled = false;
+    comunaSelect.length = 1;
+    comunaSelect.value = "";
+
+    let region = region_comuna.regiones[event.target.value-1];
+    console.log(region.nombre);
+
+    region.comunas.forEach(d=>
+        comunaSelect.add(new Option(d.nombre, d.id))
+    )
+}
+
+function handleContactSelection() {
+    const selectedOptions = Array.from(document.querySelectorAll('#contact-methods input:checked'));
+    const options = Array.from(document.querySelectorAll('#contact-methods input'));
+    const contactInputsDiv = document.getElementById('contact-inputs');
+    contactInputsDiv.innerHTML = '';
+
+    options.forEach(option => {
+        if (option.checked) {
+            const inputDiv = document.createElement('div');
+            inputDiv.style.marginTop = '10px';
+    
+            const label = document.createElement('label');
+            label.setAttribute('for', `contact-${option.value}`);
+            switch (option.value) {
+                case 'x':
+                    label.textContent = `Ingrese su perfil de X:`
+                    break;
+                case 'whatsapp':
+                    label.textContent = `Ingrese su contacto para WhatsApp:`
+                    break;
+                case 'telegram':
+                    label.textContent = `Ingrese su contacto para Telegram:`
+                    break;
+                case 'instagram':
+                    label.textContent = `Ingrese su perfil de Instagram:`
+                    break;
+                case 'tik-tok':
+                    label.textContent = `Ingrese su perfil de Tik-Tok:`
+                    break;
+                case 'otra':
+                    label.textContent = `Otra red social:`
+                    break;
+            }
+    
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = `contact-${option.value}`;
+            input.name = `contact-${option.value}`;
+            input.minLength = 4;
+            input.maxLength = 50;
+            input.required = true;
+    
+            inputDiv.appendChild(label);
+            inputDiv.appendChild(document.createElement('br'));
+            inputDiv.appendChild(input);
+    
+            contactInputsDiv.appendChild(inputDiv);
+        } else if (selectedOptions.length == 5) {
+            option.disabled = true;
+        } else {
+            option.disabled = false;
+        }
+    });
+}
+
+function loadForm() {
+    const regionSelect = document.getElementById('region-select');
+    const contactInputsDiv = document.getElementById('contact-inputs');
+    
+    regionSelect.addEventListener("change", enableComuna);
+    region_comuna.regiones.forEach(d=>
+        regionSelect.add(new Option(d.nombre, d.numero))
+    )
+}
 
 function toggleWindow(rowId) {
     const window = document.getElementById(`window-${rowId}`);

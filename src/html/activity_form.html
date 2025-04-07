@@ -7,16 +7,115 @@
     <script src="../js/scripts.js"></script>
     <title>U-Actividades</title>
 </head>
-<body>
+<body onload="loadForm()">
     <div>
         <h1>Informar una nueva actividad</h1>
         <p>Lorem ipsum Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque pellentesque nibh sit amet nisi eleifend, sed bibendum sem dapibus. Nam suscipit quis arcu a imperdiet.</p>
     </div>
     <div>
-        <form action="">
-
+        <form>
+            <div>
+                <h3>¿Dónde?</h3>
+                <div>
+                    <label for="region-select">Región:</label>
+                    <select id="region-select" name="region" required>
+                        <option value="" selected disabled>Por favor elija una región.</option>
+                    </select>
+                </div>
+                <br>
+                <div>
+                    <label for="comuna-select">Comuna:</label>
+                    <select id="comuna-select" name="comuna" disabled required>
+                        <option value="" selected disabled>Por favor elija una comuna.</option>
+                    </select>
+                </div>
+                <br>
+                <div>
+                    <label for="sector-input">Sector:</label>
+                    <textarea
+                        name="sector" 
+                        id="sector-input" 
+                        maxlength="100"
+                    >
+                    </textarea>
+                </div>
+            </div>
+            <br>
+            <div>
+                <h3>¿Quién organiza?</h3>
+                <div>
+                    <!-- Nombre -->
+                    <label for="name-input">Nombre:</label>
+                    <input 
+                        type="text" 
+                        id="name-input" 
+                        name="name" 
+                        maxlength="200" 
+                        required 
+                    >
+                </div>
+                <br>
+                <div>
+                    <!-- Email -->
+                    <label for="email-input">Email:</label>
+                    <input 
+                        type="email" 
+                        id="email-input" 
+                        name="email" 
+                        maxlength="100" 
+                        required 
+                    >
+                </div>
+                <br>
+                <div>
+                    <!-- Teléfono -->
+                    <label for="tel-input">Teléfono:</label>
+                    <input 
+                        type="tel"
+                        id="tel-input" 
+                        name="telefono" 
+                        required
+                    >
+                </div>
+                <br>
+                <div>
+                    <!-- Contácto -->
+                    <label>Métodos de Contacto:</label>
+                    <div id="contact-methods">
+                        <label>
+                            <input type="checkbox" value="whatsapp" onchange="handleContactSelection()"> WhatsApp
+                        </label>
+                        <br>
+                        <label>
+                            <input type="checkbox" value="telegram" onchange="handleContactSelection()"> Telegram
+                        </label>
+                        <br>
+                        <label>
+                            <input type="checkbox" value="x" onchange="handleContactSelection()"> X
+                        </label>
+                        <br>
+                        <label>
+                            <input type="checkbox" value="instagram" onchange="handleContactSelection()"> Instagram
+                        </label>
+                        <br>
+                        <label>
+                            <input type="checkbox" value="tik-tok" onchange="handleContactSelection()"> Tik-Tok
+                        </label>
+                        <br>
+                        <label>
+                            <input type="checkbox" value="otra" onchange="handleContactSelection()"> Otra
+                        </label>
+                    </div>
+                    <div id="contact-inputs"></div>
+                </div>
+            </div>
+            <br>
+            <div>
+                <h3>¿Cuándo y de qué trata?</h3>
+            </div>
         </form>
     </div>
+    <br>
     <div>
         <button onclick="window.location.href='index.html'">Volver a Inicio</button>
     </div>
