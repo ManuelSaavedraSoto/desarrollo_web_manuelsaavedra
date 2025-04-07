@@ -68,6 +68,8 @@ let region_comuna = {
     ]
 };
 
+const maxPhotos = 5;
+
 function toggleWindow(rowId) {
     const window = document.getElementById(`window-${rowId}`);
     const overlay = document.getElementById('overlay');
