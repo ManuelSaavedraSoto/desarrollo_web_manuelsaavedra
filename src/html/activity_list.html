@@ -4,8 +4,136 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>U-Actividades</title>
+    <style>
+        .floating-window {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 20px;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+    </style>
+    <script>
+        function toggleWindow(rowId) {
+            const window = document.getElementById(`window-${rowId}`);
+            const overlay = document.getElementById('overlay');
+            if (window.style.display === 'none' || window.style.display === '') {
+                window.style.display = 'block';
+                overlay.style.display = 'block';
+            } else {
+                window.style.display = 'none';
+                overlay.style.display = 'none';
+            }
+        }
+    </script>
 </head>
 <body>
-    <h1>Activity List</h1>
+    <h1>Listado de Actividades</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Inicio</th>
+                <th>Termino</th>
+                <th>Comuna</th>
+                <th>Sector</th>
+                <th>Tema</th>
+                <th>Nombre Organizador</th>
+                <th>Total Fotos</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>01-01-2025</td>
+                <td>02-01-2025</td>
+                <td>Santiago</td>
+                <td>Centro</td>
+                <td>Cultura</td>
+                <td>Juan Pérez</td>
+                <td>10</td>
+                <td><button onclick="toggleWindow(1)">Ver Más</button></td>
+            </tr>
+            <tr>
+                <td>03-01-2025</td>
+                <td>04-01-2025</td>
+                <td>Valparaíso</td>
+                <td>Puerto</td>
+                <td>Arte</td>
+                <td>María López</td>
+                <td>15</td>
+                <td><button onclick="toggleWindow(2)">Ver Más</button></td>
+            </tr>
+            <tr>
+                <td>05-01-2025</td>
+                <td>06-01-2025</td>
+                <td>Concepción</td>
+                <td>Sur</td>
+                <td>Música</td>
+                <td>Carlos Díaz</td>
+                <td>8</td>
+                <td><button onclick="toggleWindow(3)">Ver Más</button></td>
+            </tr>
+            <tr>
+                <td>07-01-2025</td>
+                <td>08-01-2025</td>
+                <td>La Serena</td>
+                <td>Norte</td>
+                <td>Deporte</td>
+                <td>Ana Gómez</td>
+                <td>12</td>
+                <td><button onclick="toggleWindow(4)">Ver Más</button></td>
+            </tr>
+            <tr>
+                <td>09-01-2025</td>
+                <td>10-01-2025</td>
+                <td>Temuco</td>
+                <td>Sur</td>
+                <td>Educación</td>
+                <td>Pedro Ruiz</td>
+                <td>20</td>
+                <td><button onclick="toggleWindow(5)">Ver Más</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div id="overlay" class="overlay" onclick="toggleWindow('')"></div>
+
+    <div id="window-1" class="floating-window">
+        <p>Detalles de la actividad 1</p>
+        <button onclick="toggleWindow(1)">Cerrar</button>
+    </div>
+    <div id="window-2" class="floating-window">
+        <p>Detalles de la actividad 2</p>
+        <button onclick="toggleWindow(2)">Cerrar</button>
+    </div>
+    <div id="window-3" class="floating-window">
+        <p>Detalles de la actividad 3</p>
+        <button onclick="toggleWindow(3)">Cerrar</button>
+    </div>
+    <div id="window-4" class="floating-window">
+        <p>Detalles de la actividad 4</p>
+        <button onclick="toggleWindow(4)">Cerrar</button>
+    </div>
+    <div id="window-5" class="floating-window">
+        <p>Detalles de la actividad 5</p>
+        <button onclick="toggleWindow(5)">Cerrar</button>
+    </div>
+
+    <button onclick="window.location.href='index.html'" style="margin-top: 20px;">Volver a Inicio</button>
 </body>
 </html>
