@@ -3,44 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/scripts.js"></script>
     <title>U-Actividades</title>
-    <style>
-        .floating-window {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            border: 1px solid #ccc;
-            padding: 20px;
-            z-index: 1000;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-    </style>
-    <script>
-        function toggleWindow(rowId) {
-            const window = document.getElementById(`window-${rowId}`);
-            const overlay = document.getElementById('overlay');
-            if (window.style.display === 'none' || window.style.display === '') {
-                window.style.display = 'block';
-                overlay.style.display = 'block';
-            } else {
-                window.style.display = 'none';
-                overlay.style.display = 'none';
-            }
-        }
-    </script>
 </head>
 <body>
     <h1>Listado de Actividades</h1>
