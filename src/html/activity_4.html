@@ -5,10 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/style.css">
     <script src="../js/scripts.js"></script>
-    <title>U-Actividades</title>
+    <title>Detalles de Actividad</title>
 </head>
 <body>
-    <!--...-->
+    <div>
+        <h1>Detalles de Actividad</h1>
+        <p>Inicio: 09-01-2025 07:00</p>
+        <p>Término: 16-01-2025 18:00</p>
+        <p>Comuna: Temuco</p>
+        <p>Sector: Sur</p>
+        <p>Tema: Educación</p>
+        <p>Nombre Organizador: Pedro Ruiz</p>
+        <p>Total Fotos: 3</p>
+    </div>
+    <div class="image-gallery">
+        <img src="../media/placeholder.png" alt="Foto 1" onclick="showImage(this.src)">
+        <img src="../media/placeholder.png" alt="Foto 2" onclick="showImage(this.src)">
+        <img src="../media/placeholder.png" alt="Foto 3" onclick="showImage(this.src)">
+    </div>
+    <div id="image-window" class="floating-image">
+        <button onclick="closeImage()">Cerrar</button>
+        <img src="" alt="Imagen Ampliada">
+    </div>
+    <div id="overlay" class="overlay" onclick="closeImage()"></div>
     <div>
         <button onclick="window.location.href='activity_list.html'">Volver a Lista de Actividades</button>
         <button onclick="window.location.href='index.html'">Volver a Inicio</button>

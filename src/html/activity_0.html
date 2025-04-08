@@ -5,10 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/style.css">
     <script src="../js/scripts.js"></script>
-    <title>U-Actividades</title>
+    <title>Detalles de Actividad</title>
 </head>
 <body>
-    <!--...-->
+    <div>
+        <h1>Detalles de Actividad</h1>
+        <p>Inicio: 01-01-2025 08:30</p>
+        <p>Término: 01-01-2025 10:00</p>
+        <p>Comuna: Santiago</p>
+        <p>Sector: La Moneda</p>
+        <p>Tema: Cultura</p>
+        <p>Nombre Organizador: Juan Pérez</p>
+        <p>Total Fotos: 1</p>
+    </div>
+    <div class="image-gallery">
+        <img src="../media/placeholder.png" alt="Foto 1" onclick="showImage(this.src)">
+    </div>
+    <div id="image-window" class="floating-image">
+        <button onclick="closeImage()">Cerrar</button>
+        <img src="" alt="Imagen Ampliada">
+    </div>
+    <div id="overlay" class="overlay" onclick="closeImage()"></div>
     <div>
         <button onclick="window.location.href='activity_list.html'">Volver a Lista de Actividades</button>
         <button onclick="window.location.href='index.html'">Volver a Inicio</button>

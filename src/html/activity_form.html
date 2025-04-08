@@ -13,7 +13,7 @@
         <p>Lorem ipsum Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque pellentesque nibh sit amet nisi eleifend, sed bibendum sem dapibus. Nam suscipit quis arcu a imperdiet.</p>
     </div>
     <div>
-        <form>
+        <form id="actividad-form" action="index.html">
             <div>
                 <h3>¿Dónde?</h3>
                 <div>
@@ -44,7 +44,6 @@
             <div>
                 <h3>¿Quién organiza?</h3>
                 <div>
-                    <!-- Nombre -->
                     <label for="name-input">Nombre:</label>
                     <input 
                         type="text" 
@@ -56,7 +55,6 @@
                 </div>
                 <br>
                 <div>
-                    <!-- Email -->
                     <label for="email-input">Email:</label>
                     <input 
                         type="email" 
@@ -64,60 +62,151 @@
                         name="email" 
                         maxlength="100" 
                         required 
+                        onchange="validateEmail()"
                     >
                 </div>
                 <br>
                 <div>
-                    <!-- Teléfono -->
                     <label for="tel-input">Teléfono:</label>
                     <input 
                         type="tel"
                         id="tel-input" 
                         name="telefono" 
                         required
+                        onchange="validateTel()"
                     >
+                    <label for="tel-input" style="color: dimgrey;">Eg: +123.12345678</label>
                 </div>
                 <br>
                 <div>
-                    <!-- Contácto -->
                     <label>Métodos de Contacto:</label>
                     <div id="contact-methods">
                         <label>
-                            <input type="checkbox" value="whatsapp" onchange="handleContactSelection()"> WhatsApp
+                            <input type="checkbox" value="whatsapp" onchange="handleContactSelection(this)"> WhatsApp
                         </label>
                         <br>
                         <label>
-                            <input type="checkbox" value="telegram" onchange="handleContactSelection()"> Telegram
+                            <input type="checkbox" value="telegram" onchange="handleContactSelection(this)"> Telegram
                         </label>
                         <br>
                         <label>
-                            <input type="checkbox" value="x" onchange="handleContactSelection()"> X
+                            <input type="checkbox" value="x" onchange="handleContactSelection(this)"> X
                         </label>
                         <br>
                         <label>
-                            <input type="checkbox" value="instagram" onchange="handleContactSelection()"> Instagram
+                            <input type="checkbox" value="instagram" onchange="handleContactSelection(this)"> Instagram
                         </label>
                         <br>
                         <label>
-                            <input type="checkbox" value="tik-tok" onchange="handleContactSelection()"> Tik-Tok
+                            <input type="checkbox" value="tik-tok" onchange="handleContactSelection(this)"> Tik-Tok
                         </label>
                         <br>
                         <label>
-                            <input type="checkbox" value="otra" onchange="handleContactSelection()"> Otra
+                            <input type="checkbox" value="otra" onchange="handleContactSelection(this)"> Otra
                         </label>
                     </div>
-                    <div id="contact-inputs"></div>
+                    <div id="contact-inputs">
+                        <div style="margin-top: 10px;" id="contact-whatsapp" hidden>
+                            <label for="contact-whatsapp-input">Ingrese su contacto para WhatsApp:</label>
+                            <br>
+                            <input type="text" id="contact-whatsapp-input" name="contact-whatsapp" minlength="4" maxlength="50">
+                        </div>
+                        <div style="margin-top: 10px;" id="contact-telegram" hidden>
+                            <label for="contact-telegram-input">Ingrese su contacto para Telegram:</label>
+                            <br>
+                            <input type="text" id="contact-telegram-input" name="contact-telegram" minlength="4" maxlength="50">
+                        </div>
+                        <div style="margin-top: 10px;" id="contact-x" hidden>
+                            <label for="contact-x-input">Ingrese su contacto para X:</label>
+                            <br>
+                            <input type="text" id="contact-x-input" name="contact-x" minlength="4" maxlength="50">
+                        </div>
+                        <div style="margin-top: 10px;" id="contact-instagram" hidden>
+                            <label for="contact-instagram-input">Ingrese su contacto para Instagram:</label>
+                            <br>
+                            <input type="text" id="contact-instagram-input" name="contact-instagram" minlength="4" maxlength="50">
+                        </div>
+                        <div style="margin-top: 10px;" id="contact-tik-tok" hidden>
+                            <label for="contact-tik-tok-input">Ingrese su contacto para Tik-Tok:</label>
+                            <br>
+                            <input type="text" id="contact-tik-tok-input" name="contact-tik-tok" minlength="4" maxlength="50">
+                        </div>
+                        <div style="margin-top: 10px;" id="contact-otra" hidden>
+                            <label for="contact-otra-input">Otra red social:</label>
+                            <br>
+                            <input type="text" id="contact-otra-input" name="contact-otra" minlength="4" maxlength="50">
+                        </div>
+                    </div>
                 </div>
             </div>
             <br>
             <div>
                 <h3>¿Cuándo y de qué trata?</h3>
+                <div>
+                    <label for="init-datetime">Día/Hora Inicio: </label>
+                    <input type="datetime-local" name="init-input" id="init-datetime" required onchange="updateEndDateTimeInput(this)">
+                </div>
+                <br>
+                <div>
+                    <label for="end-datetime">Día/Hora Término: </label>
+                    <input type="datetime-local" name="end-input" id="end-datetime" onchange="validateEndDateTimeInput(this)">
+                    <label for="end-datetime" style="color: red;" id="end-datetime-error-label" hidden>Fecha erronea</label>
+                </div>
+                <br>
+                <div>
+                    <label for="description-input">Descripción: </label>
+                    <textarea name="description" id="description-input" cols="50" rows="10"></textarea>
+                </div>
+                <br>
+                <div>
+                    <label>Tema: </label>
+                    <div id="theme-inputs">
+                        <label class="checkbox-label"><input type="checkbox" value="Música"> Música</label>
+                        <br>
+                        <label class="checkbox-label"><input type="checkbox" value="Deporte"> Deporte</label>
+                        <br>
+                        <label class="checkbox-label"><input type="checkbox" value="Ciencias"> Ciencias</label>
+                        <br>
+                        <label class="checkbox-label"><input type="checkbox" value="Religión"> Religión</label>
+                        <br>
+                        <label class="checkbox-label"><input type="checkbox" value="Política"> Política</label>
+                        <br>
+                        <label class="checkbox-label"><input type="checkbox" value="Tecnología"> Tecnología</label>
+                        <br>
+                        <label class="checkbox-label"><input type="checkbox" value="Juegos"> Juegos</label>
+                        <br>
+                        <label class="checkbox-label"><input type="checkbox" value="Baile"> Baile</label>
+                        <br>
+                        <label class="checkbox-label"><input type="checkbox" value="Comida"> Comida</label>
+                        <br>
+                        <label class="checkbox-label"><input type="checkbox" value="Otro" onchange="handleThemeSelection(this)"> Otro</label>
+                        <div id="other-theme-input" style="margin-top: 10px;" hidden>
+                            <label for="other-theme-text-input">Otro: </label>
+                            <input type="text" name="other-theme" id="other-theme-text-input" minlength="3" maxlength="15">
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div>
+                    <label for="foto-input">Fotos: </label>
+                    <input accept=".png, .jpg, .jpeg" type="file" name="foto-input" id="foto-input" required multiple onchange="validateFotos(this)">
+                    <label for="foto-input" style="color: red;" id="foto-type-error-label" hidden>Solo se permiten fotos</label>
+                    <label for="foto-input" style="color: red;" id="foto-too-many-error-label" hidden>Supera máximo de fotos</label>
+                </div>
             </div>
         </form>
     </div>
     <br>
     <div>
         <button onclick="window.location.href='index.html'">Volver a Inicio</button>
+        <button id="verify-btn" type="button">Subir Actividad</button>
     </div>
+    <div id="confirmation-window" class="floating-window">
+        <h3>Confirmar Actividad</h3>
+        <p>¿Está seguro de que desea enviar esta actividad?</p>
+        <button id="submit-btn" type="button">Enviar</button>
+        <button id="close-btn" type="button">Cerrar</button>
+    </div>
+    <div id="overlay" class="overlay"></div>
 </body>
 </html>

@@ -83,69 +83,132 @@ function enableComuna(event) {
     )
 }
 
-function handleContactSelection() {
+function updateEndDateTimeInput(startInput) {
+    if (startInput.classList.contains('error'))
+        startInput.classList.remove('error');
+    
+    const endInput = document.getElementById('end-datetime');
+    const hourInMillis = 3600 * 1000;
+    let startDate = new Date(startInput.value+':00.000-04:00');
+    let endDate = new Date();
+    let minDate = new Date();
+
+    endDate.setTime(startDate.getTime() + 3*hourInMillis);
+    endDate.setTime(endDate.getTime() - 4 * hourInMillis); // "masking" timezone
+    endInput.value = endDate.toISOString().slice(0,-8);
+    
+    minDate.setTime(startDate.getTime() + 60 * 1000);
+    minDate.setTime(minDate.getTime() - 4 * hourInMillis); // "masking" timezone
+    endInput.min = minDate.toISOString().slice(0,-8);
+}
+
+function validateFotos(fileInput) {
+    const tooManyErrorLabel = document.getElementById('foto-too-many-error-label');
+    const typeErrorLabel = document.getElementById('foto-type-error-label');
+
+    let isValid = true;
+
+    if (fileInput.files.length > 5) {
+        tooManyErrorLabel.hidden = false;
+        isValid = false;
+    } else {
+        tooManyErrorLabel.hidden = true;
+    }
+
+    let i = 0;
+
+    for (let i = 0; i < fileInput.files.length; i++) {
+        let file = fileInput.files[i];
+        if (file.type != "image/png" && file.type != "image/jpg" && file.type != "image/jpeg") {
+            isValid = false;
+        }
+    }
+
+    typeErrorLabel.hidden = isValid;
+
+    if (!isValid) {
+        fileInput.classList.add('error');
+    } else if (fileInput.classList.contains("error")) {
+        fileInput.classList.remove('error');
+    }
+
+    return isValid;
+}
+
+function validateEndDateTimeInput(endInput) {    
+    const startInput = document.getElementById('init-datetime');
+    const errorMsg = document.getElementById('end-datetime-error-label');    
+    
+    if (endInput.value == "" || endInput.value == startInput.value)
+        return true;
+
+    let endDate = new Date(endInput.value+':00.000-04:00');
+    let startDate = new Date(startInput.value+':00.000-04:00');
+
+    if (endDate <= startDate) {
+        endInput.classList.add('error');
+    } else {
+        endInput.classList.remove('error');
+    }
+    
+    errorMsg.hidden = (endDate > startDate);
+
+    return (endDate > startDate);
+}
+
+function handleThemeSelection(checkbox) {
+    const otherThemeInputDiv = document.getElementById('other-theme-input');
+    const otherThemeTextInput = document.getElementById('other-theme-text-input');
+
+    if (checkbox.checked) {
+        otherThemeInputDiv.hidden = false;
+        otherThemeTextInput.required = true;
+    } else {
+        otherThemeInputDiv.hidden = true;
+        otherThemeTextInput.required = false;
+        otherThemeTextInput.value = "";
+    }
+}
+
+function handleContactSelection(selectedOption) {
     const selectedOptions = Array.from(document.querySelectorAll('#contact-methods input:checked'));
     const options = Array.from(document.querySelectorAll('#contact-methods input'));
-    const contactInputsDiv = document.getElementById('contact-inputs');
-    contactInputsDiv.innerHTML = '';
+
+    const selectedOptionDiv = document.getElementById(`contact-${selectedOption.value}`);
+    const selectedOptionInput = document.getElementById(`contact-${selectedOption.value}-input`);
+
+    selectedOptionDiv.hidden = !selectedOption.checked;
+    selectedOptionInput.required = selectedOption.checked;
+    if (!selectedOption.checked) selectedOptionInput.value = "";
 
     options.forEach(option => {
-        if (option.checked) {
-            const inputDiv = document.createElement('div');
-            inputDiv.style.marginTop = '10px';
-    
-            const label = document.createElement('label');
-            label.setAttribute('for', `contact-${option.value}`);
-            switch (option.value) {
-                case 'x':
-                    label.textContent = `Ingrese su perfil de X:`
-                    break;
-                case 'whatsapp':
-                    label.textContent = `Ingrese su contacto para WhatsApp:`
-                    break;
-                case 'telegram':
-                    label.textContent = `Ingrese su contacto para Telegram:`
-                    break;
-                case 'instagram':
-                    label.textContent = `Ingrese su perfil de Instagram:`
-                    break;
-                case 'tik-tok':
-                    label.textContent = `Ingrese su perfil de Tik-Tok:`
-                    break;
-                case 'otra':
-                    label.textContent = `Otra red social:`
-                    break;
-            }
-    
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.id = `contact-${option.value}`;
-            input.name = `contact-${option.value}`;
-            input.minLength = 4;
-            input.maxLength = 50;
-            input.required = true;
-    
-            inputDiv.appendChild(label);
-            inputDiv.appendChild(document.createElement('br'));
-            inputDiv.appendChild(input);
-    
-            contactInputsDiv.appendChild(inputDiv);
-        } else if (selectedOptions.length == 5) {
+        option.disabled = false;
+        if (!option.checked && selectedOptions.length == 5) {
             option.disabled = true;
-        } else {
-            option.disabled = false;
         }
     });
 }
 
 function loadForm() {
     const regionSelect = document.getElementById('region-select');
-    const contactInputsDiv = document.getElementById('contact-inputs');
+    const initDateInput = document.getElementById("init-datetime");
+
+    let now = new Date(Date.now());
+    now.setTime(now.getTime() - 4 * 3600 * 1000);
+    initDateInput.min = now.toISOString().slice(0,-8);
     
     regionSelect.addEventListener("change", enableComuna);
     region_comuna.regiones.forEach(d=>
         regionSelect.add(new Option(d.nombre, d.numero))
     )
+
+    document.getElementById('verify-btn').addEventListener('click', () => {
+        if (validateForm()) {
+            showConfirmationWindow();
+        } else {
+            alert('Por favor, complete todos los campos requeridos.');
+        }
+    });
 }
 
 function toggleWindow(rowId) {
@@ -158,4 +221,116 @@ function toggleWindow(rowId) {
         window.style.display = 'none';
         overlay.style.display = 'none';
     }
+}
+
+function validateForm() {
+    const form = document.getElementById('actividad-form');
+    const requiredInputs = form.querySelectorAll('[required]');
+    const themeLabels = document.querySelectorAll('#theme-inputs label.checkbox-label');
+
+    let isValid = true;
+    let themeSelected = false;
+
+    themeLabels.forEach(label => {
+        themeSelected = themeSelected || label.firstChild.checked;
+    });
+
+    if (!themeSelected) {
+        themeLabels.forEach(label => {
+            if (!label.firstChild.checked) {
+                label.classList.add('error');
+            } else {
+                label.classList.remove('error');
+            }
+        });
+        isValid = false;
+    } else {
+        themeLabels.forEach(label => label.classList.remove('error'));
+    }
+
+    requiredInputs.forEach(input => {
+        if (!input.value.trim()) {
+            input.classList.add('error');
+            isValid = false;
+        } else {
+            input.classList.remove('error');
+        }
+    });
+
+    isValid = isValid && validateEndDateTimeInput(document.getElementById('end-datetime'));
+    isValid = isValid && validateFotos(document.getElementById('foto-input'));
+    isValid = isValid && validateTel();
+    isValid = isValid && validateEmail();
+
+    return isValid;
+}
+
+function showConfirmationWindow() {
+    const confirmationWindow = document.getElementById('confirmation-window');
+    const overlay = document.getElementById('overlay');
+
+    confirmationWindow.style.display = 'block';
+    overlay.style.display = 'block';
+
+    document.getElementById('close-btn').addEventListener('click', closeConfirmationWindow);
+    document.getElementById('submit-btn').addEventListener('click', submitForm);
+}
+
+function closeConfirmationWindow() {
+    const confirmationWindow = document.getElementById('confirmation-window');
+    const overlay = document.getElementById('overlay');
+
+    confirmationWindow.style.display = 'none';
+    overlay.style.display = 'none';
+}
+
+function submitForm() {
+    const form = document.getElementById('actividad-form');
+    form.submit();
+}
+
+function validateEmail() {
+    const emailInput = document.getElementById('email-input');
+    let isValid = true;
+    let email_pattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+
+    if (!email_pattern.test(emailInput.value)) {
+        emailInput.classList.add('error');
+        isValid = false;
+    } else {
+        emailInput.classList.remove('error');
+    }
+
+    return isValid;
+}
+
+function validateTel() {
+    const telInput = document.getElementById('tel-input');
+    let tel_pattern = /\+[0-9]{3}\.[0-9]{8}/;
+    let isValid = true;
+
+    if (!tel_pattern.test(telInput.value)) {
+        telInput.classList.add('error');
+        isValid = false;
+    } else {
+        telInput.classList.remove('error');
+    }
+
+    return isValid;
+}
+
+function showImage(src) {
+    const imageWindow = document.getElementById('image-window');
+    const overlay = document.getElementById('overlay');
+    const image = imageWindow.querySelector('img');
+    image.src = src;
+    imageWindow.style.display = 'block';
+    overlay.style.display = 'block';
+}
+
+function closeImage() {
+    const imageWindow = document.getElementById('image-window');
+    const overlay = document.getElementById('overlay');
+    imageWindow.style.display = 'none';
+    overlay.style.display = 'none';
 }

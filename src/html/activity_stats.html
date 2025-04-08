@@ -3,17 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../css/style.css">
-    <script src="../js/scripts.js"></script>
-    <title>U-Actividades</title>
+    <title>Estadísticas de Actividades</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .chart {
+            width: 100%; /* Default to full width */
+            height: auto;
+        }
+        @media (min-width: 1500px) {
+            .chart {
+                width: 33vw; /* Each chart occupies a third of the viewport width */
+            }
+        }
+    </style>
 </head>
 <body>
-    <div>
-        <h1>Estadísticas</h1>
-        <p>Lorem ipsum Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque pellentesque nibh sit amet nisi eleifend, sed bibendum sem dapibus. Nam suscipit quis arcu a imperdiet. Aenean vel ante tempor, mollis arcu a, fringilla mi. Duis in lorem faucibus, mollis purus quis, pretium ipsum. Sed nec turpis elementum diam lobortis mattis. Morbi vel feugiat lacus, nec aliquam elit.</p>
+    <h1>Estadísticas de Actividades</h1>
+
+    <div class="chart-container">
+        <!-- Activity per Day Graph -->
+        <div class="chart">
+            <h2>Actividades por Día</h2>
+            <canvas id="activitiesPerDayChart"></canvas>
+        </div>
+
+        <!-- Activities per Theme Pie Chart -->
+        <div class="chart">
+            <h2>Actividades por Tema</h2>
+            <canvas id="activitiesPerThemeChart"></canvas>
+        </div>
+
+        <!-- Activities by Time of Day Bar Graph -->
+        <div class="chart">
+            <h2>Actividades por Mes y Hora del Día</h2>
+            <canvas id="activitiesByTimeChart"></canvas>
+        </div>
     </div>
-    <div>
-        <button onclick="window.location.href='index.html'">Volver a Inicio</button>
-    </div>
+
+    <button onclick="window.location.href='index.html'" style="margin-top: 20px;">Volver a Inicio</button>
+
+    <script>
+        // Data from the tables
+        const activities = [
+            { start: "01-01-2025 08:30", theme: "Cultura" },
+            { start: "03-01-2025 15:00", theme: "Arte" },
+            { start: "05-01-2025 16:00", theme: "Música" },
+            { start: "07-01-2025 12:00", theme: "Deporte" },
+            { start: "09-01-2025 07:00", theme: "Educación" }
+        ];
+
+        // Helper functions
+        function parseDate(dateString) {
+            const [day, month, year, time] = dateString.split(/[- :]/);
+            return new Date(`${year}-${month}-${day}T${time}:00`);
+        }
+
+        function groupBy(array, key) {
+            return array.reduce((result, item) => {
+                const value = item[key];
+                result[value] = (result[value] || 0) + 1;
+                return result;
+            }, {});
+        }
+
+        // Activities per Day
+        const activitiesPerDay = activities.reduce((acc, activity) => {
+            const date = parseDate(activity.start).toISOString().split("T")[0];
+            acc[date] = (acc[date] || 0) + 1;
+            return acc;
+        }, {});
+
+        const days = Object.keys(activitiesPerDay);
+        const activitiesCount = Object.values(activitiesPerDay);
+
+        new Chart(document.getElementById("activitiesPerDayChart"), {
+            type: "line",
+            data: {
+                labels: days,
+                datasets: [{
+                    label: "Actividades por Día",
+                    data: activitiesCount,
+                    borderColor: "blue",
+                    backgroundColor: "rgba(0, 0, 255, 0.2)",
+                    fill: true
+                }]
+            }
+        });
+
+        // Activities per Theme
+        const activitiesPerTheme = groupBy(activities, "theme");
+        const themes = Object.keys(activitiesPerTheme);
+        const themeCounts = Object.values(activitiesPerTheme);
+
+        new Chart(document.getElementById("activitiesPerThemeChart"), {
+            type: "pie",
+            data: {
+                labels: themes,
+                datasets: [{
+                    label: "Actividades por Tema",
+                    data: themeCounts,
+                    backgroundColor: ["red", "blue", "green", "yellow", "purple"]
+                }]
+            }
+        });
+
+        // Activities by Time of Day
+        const timeOfDayCounts = activities.reduce((acc, activity) => {
+            const date = parseDate(activity.start);
+            const month = date.toLocaleString("default", { month: "long" });
+            const hour = date.getHours();
+
+            const timeOfDay = hour < 12 ? "Mañana" : hour < 18 ? "Tarde" : "Noche";
+            acc[month] = acc[month] || { Mañana: 0, Tarde: 0, Noche: 0 };
+            acc[month][timeOfDay]++;
+            return acc;
+        }, {});
+
+        const months = Object.keys(timeOfDayCounts);
+        const morningCounts = months.map(month => timeOfDayCounts[month].Mañana);
+        const afternoonCounts = months.map(month => timeOfDayCounts[month].Tarde);
+        const eveningCounts = months.map(month => timeOfDayCounts[month].Noche);
+
+        new Chart(document.getElementById("activitiesByTimeChart"), {
+            type: "bar",
+            data: {
+                labels: months,
+                datasets: [
+                    {
+                        label: "Mañana",
+                        data: morningCounts,
+                        backgroundColor: "orange"
+                    },
+                    {
+                        label: "Tarde",
+                        data: afternoonCounts,
+                        backgroundColor: "blue"
+                    },
+                    {
+                        label: "Noche",
+                        data: eveningCounts,
+                        backgroundColor: "purple"
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
