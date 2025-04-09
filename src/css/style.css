@@ -68,3 +68,34 @@
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 999;
 }
+
+.btn-row {
+    display: table-row;
+    border: none;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.full-width-table {
+    width: 100%; /* Make the table occupy the full width of the viewport */
+    border-collapse: collapse; /* Remove gaps between table borders */
+    margin: 20px 0;
+}
+
+.full-width-table th, .full-width-table td {
+    padding: 10px;
+}
+
+.full-width-table th {
+    background-color: lightgray;
+    font-weight: bold;
+}
+
+.full-width-table tr {
+    background-color: #f9f9f9;
+}
+
+.full-width-table tr:hover {
+    background-color: lightblue;
+}
