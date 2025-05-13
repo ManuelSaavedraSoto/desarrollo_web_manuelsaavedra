@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <title>U-Actividades</title>
+</head>
+<body>
+    <div>
+        <h1>Lista de Actividades</h1>
+        <p>Lorem ipsum Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+    </div>
+    <div>
+        <table class="full-width-table">
+            <tr>
+                <th scope="col">Inicio</th>
+                <th scope="col">Termino</th>
+                <th scope="col">Comuna</th>
+                <th scope="col">Sector</th>
+                <th scope="col">Tema</th>
+                <th scope="col">Nombre Organizador</th>
+                <th scope="col">Total Fotos</th>
+            </tr>
+            {% for actividad in actividades %}
+            <tr onclick="window.location.href='{{ url_for('activityDetail', activity_id=actividad.id) }}'" class="btn-row">
+                <td>{{ actividad.dia_hora_inicio.strftime('%d-%m-%Y %H:%M') }}</td>
+                <td>{{ actividad.dia_hora_termino.strftime('%d-%m-%Y %H:%M') if actividad.dia_hora_termino else 'No especificado' }}</td>
+                <td>{{ actividad.comuna.nombre }}</td>
+                <td>{{ actividad.sector if actividad.sector else 'No especificado' }}</td>
+                <td>
+                    {% for tema in actividad.temas %}
+                        {% if tema.tema == 'otro' %}
+                            {{ tema.glosa_otro }}
+                        {% else %}
+                            {{ tema.tema }}
+                        {% endif %}
+                        {% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+                <td>{{ actividad.nombre }}</td>
+                <td>{{ actividad.fotos|length }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div>
+        <button onclick="window.location.href='{{ url_for('index') }}'" style="margin-top: 20px;">Volver a Inicio</button>
+    </div>
+</body>
+</html>
