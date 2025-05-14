@@ -1,3 +1,4 @@
+# pylint: disable=too-few-public-methods
 """DB connection and ORM models for the application."""
 
 from sqlalchemy import (
