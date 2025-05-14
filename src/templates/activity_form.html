@@ -26,7 +26,7 @@
         <p>Lorem ipsum Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque pellentesque nibh sit amet nisi eleifend, sed bibendum sem dapibus. Nam suscipit quis arcu a imperdiet.</p>
     </div>
     <div>
-        <form id="actividad-form" onsubmit="return false;" action="{{ url_for('activityForm') }}" method="POST" enctype="multipart/form-data">
+        <form id="actividad-form" onsubmit="return false;" enctype="multipart/form-data">
             <div>
                 <h3>¿Dónde?</h3>
                 <div>
@@ -164,9 +164,10 @@
                 </div>
                 <br>
                 <div>
-                    <label for="end-datetime">Día/Hora Término: </label>
+                    <label for="end-datetime">Día/Hora Término (opcional): </label>
                     <input type="datetime-local" name="end-input" id="end-datetime" onchange="validateEndDateTimeInput(this)">
-                    <label for="end-datetime" style="color: red;" id="end-datetime-error-label" hidden>Fecha erronea</label>
+                    <label for="end-datetime" style="color: dimgrey;" id="end-datetime-help">Si no se especifica, se asumirá 3 horas después del inicio</label>
+                    <label for="end-datetime" style="color: red;" id="end-datetime-error-label" hidden>La fecha de término debe ser al menos 1 hora después del inicio</label>
                 </div>
                 <br>
                 <div>
@@ -238,8 +239,8 @@
     </div>
     <br>
     <div>
-        <button onclick="window.location.href='{{ url_for('index') }}'">Volver a Inicio</button>
-        <button id="verify-btn" type="button">Subir Actividad</button>
+        <button type="button" onclick="window.location.href='{{ url_for('index') }}'">Volver a Inicio</button>
+        <button type="button" id="verify-btn">Subir Actividad</button>
     </div>
     <div id="confirmation-window" class="floating-window">
         <h3>Confirmar Actividad</h3>

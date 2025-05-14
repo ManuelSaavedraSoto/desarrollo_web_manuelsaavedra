@@ -119,7 +119,7 @@
             if (b === 'Otros') return -1;
             return a.localeCompare(b);
         });
-        const themeCounts = themes.map(theme => themeData[theme.toLowerCase()]);
+        const themeCounts = themes.map(theme => themeData[theme]);
 
         // Generate colors based on number of themes
         const colors = themes.map((theme, i) => {

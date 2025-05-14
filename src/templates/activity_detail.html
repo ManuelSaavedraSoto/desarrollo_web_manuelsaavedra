@@ -5,78 +5,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
-    <title>Detalles de Actividad</title>
+    <title>U-Actividades - Detalles</title>
 </head>
 <body>
-    <div>
-        <h1>Detalles de Actividad</h1>
-        <p>Inicio: {{ actividad.dia_hora_inicio.strftime('%d-%m-%Y %H:%M') }}</p>
-        <p>Término: {{ actividad.dia_hora_termino.strftime('%d-%m-%Y %H:%M') if actividad.dia_hora_termino else 'No especificado' }}</p>
-        <p>Comuna: {{ actividad.comuna.nombre }}</p>
-        <p>Sector: {{ actividad.sector if actividad.sector else 'No especificado' }}</p>
-        <p>Temas:
-            {% for tema in actividad.temas %}
-                {% if tema.tema == 'otro' %}
-                    {{ tema.glosa_otro }}
-                {% else %}
-                    {{ tema.tema|capitalize }}
-                {% endif %}
-                {% if not loop.last %}, {% endif %}
-            {% endfor %}
-        </p>
-        <p>Nombre Organizador: {{ actividad.nombre }}</p>
-        <p>Email: {{ actividad.email }}</p>
-        <p>Celular: {{ actividad.celular if actividad.celular else 'No especificado' }}</p>
-        <p>Descripción: {{ actividad.descripcion if actividad.descripcion else 'No especificada' }}</p>
+    <div class="container">
+        <h1>Detalles de la Actividad</h1>
         
-        {% if actividad.contactos %}
-        <p>Contactar por:</p>
-        <ul>
-            {% for contacto in actividad.contactos %}
-            <li>
-                {% if contacto.nombre == 'whatsapp' %}
-                    WhatsApp
-                {% elif contacto.nombre == 'telegram' %}
-                    Telegram
-                {% elif contacto.nombre == 'X' %}
-                    X
-                {% elif contacto.nombre == 'instagram' %}
-                    Instagram
-                {% elif contacto.nombre == 'tiktok' %}
-                    Tik-Tok
-                {% elif contacto.nombre == 'otra' %}
-                    Otro
-                {% else %}
-                    {{ contacto.nombre }}
-                {% endif %}: {{ contacto.identificador }}
-            </li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        
-        <p>Total Fotos: {{ actividad.fotos|length }}</p>
-    </div>
+        <div class="nav-buttons">
+            <button onclick="window.location.href='{{ url_for('activity_list') }}'">Volver a Lista</button>
+            <button onclick="window.location.href='{{ url_for('index') }}'">Volver a Inicio</button>
+        </div>
 
-    {% if actividad.fotos %}
-    <div class="image-gallery">
-        {% for foto in actividad.fotos %}
-        <img src="{{ url_for('static', filename=foto.ruta_archivo) }}" 
-             alt="{{ foto.nombre }}" 
-             onclick="showImage(this.src)">
-        {% endfor %}
+        <div class="detail-card">
+            <h2>{{ actividad.nombre }}</h2>
+            
+            <div class="detail-section">
+                <h3>Fecha y Hora</h3>
+                <p><strong>Inicio:</strong> {{ actividad.dia_hora_inicio.strftime('%d-%m-%Y %H:%M') }}</p>
+                <p><strong>Término:</strong> {{ actividad.dia_hora_termino.strftime('%d-%m-%Y %H:%M') if actividad.dia_hora_termino else 'No especificado' }}</p>
+            </div>
+
+            <div class="detail-section">
+                <h3>Ubicación</h3>
+                <p><strong>Comuna:</strong> {{ actividad.comuna.nombre }}</p>
+                {% if actividad.sector %}
+                <p><strong>Sector:</strong> {{ actividad.sector }}</p>
+                {% endif %}
+            </div>
+
+            <div class="detail-section">
+                <h3>Temas</h3>
+                <p>
+                    {% for tema in actividad.temas %}
+                    <span class="theme-tag">
+                        {% if tema.tema == 'otro' %}
+                            {{ tema.glosa_otro }}
+                        {% else %}
+                            {{ tema.tema|capitalize }}
+                        {% endif %}
+                    </span>
+                    {% endfor %}
+                </p>
+            </div>
+
+            {% if actividad.contactos %}
+            <div class="detail-section">
+                <h3>Contactos</h3>
+                <ul class="contact-list">
+                    {% for contacto in actividad.contactos %}
+                    <li>
+                        <strong>
+                            {% if contacto.nombre == 'whatsapp' %}
+                                WhatsApp
+                            {% elif contacto.nombre == 'telegram' %}
+                                Telegram
+                            {% elif contacto.nombre == 'x' %}
+                                X
+                            {% elif contacto.nombre == 'instagram' %}
+                                Instagram
+                            {% elif contacto.nombre == 'tik-tok' %}
+                                TikTok
+                            {% elif contacto.nombre == 'otra' %}
+                                Otro
+                            {% else %}
+                                {{ contacto.nombre|capitalize }}
+                            {% endif %}
+                        </strong>: {{ contacto.identificador }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if actividad.descripcion %}
+            <div class="detail-section">
+                <h3>Descripción</h3>
+                <p>{{ actividad.descripcion }}</p>
+            </div>
+            {% endif %}
+
+            {% if actividad.fotos %}
+            <div class="detail-section">
+                <h3>Fotos ({{ actividad.fotos|length }})</h3>
+                <div class="image-gallery">
+                    {% for foto in actividad.fotos %}
+                    <img src="{{ url_for('static', filename=foto.ruta_archivo) }}" 
+                         alt="Foto {{ loop.index }}" 
+                         onclick="showImage(this.src)">
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </div>
 
     <div id="image-window" class="floating-image">
-        <button onclick="closeImage()">Cerrar</button>
+        <button onclick="closeImage()" class="close-button" aria-label="Cerrar">&times;</button>
         <img id="enlarged-image" alt="Imagen Ampliada">
     </div>
     <div id="overlay" class="overlay" onclick="closeImage()"></div>
-    
-    {% endif %}
-
-    <div>
-        <button onclick="window.location.href='{{ url_for('activityList') }}'">Volver a Lista de Actividades</button>
-        <button onclick="window.location.href='{{ url_for('index') }}'">Volver a Inicio</button>
-    </div>
 </body>
 </html>

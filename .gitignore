@@ -1,4 +1,13 @@
+# Ignore virtual environment
 .venv/
+
+# Ignore assignment description files
 enunciado.pdf
 tarea2.png
-src/__pycache__
+
+# Ignore Python cache files
+**/__pycache__/
+
+# Ignore upload files except for cat_*
+src/static/uploads
+!src/static/uploads/cat_*

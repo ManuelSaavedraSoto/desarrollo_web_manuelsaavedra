@@ -54,22 +54,36 @@ function handleContactSelection(selectedOption) {
 }
 
 function updateEndDateTimeInput(startInput) {
-    if (startInput.classList.contains('error'))
+    if (startInput.classList.contains('error')) {
         startInput.classList.remove('error');
+    }
     
     const endInput = document.getElementById('end-datetime');
-    const hourInMillis = 3600 * 1000;
-    let startDate = new Date(startInput.value+':00.000-04:00');
-    let endDate = new Date();
-    let minDate = new Date();
-
-    endDate.setTime(startDate.getTime() + 3*hourInMillis);
-    endDate.setTime(endDate.getTime() - 4 * hourInMillis); // "masking" timezone
-    endInput.value = endDate.toISOString().slice(0,-8);
+    const errorLabel = document.getElementById('end-datetime-error-label');
+    const helpText = document.getElementById('end-datetime-help');
     
-    minDate.setTime(startDate.getTime() + 60 * 1000);
-    minDate.setTime(minDate.getTime() - 4 * hourInMillis); // "masking" timezone
-    endInput.min = minDate.toISOString().slice(0,-8);
+    if (!startInput.value) {
+        endInput.value = '';
+        return;
+    }
+
+    // Parse start date with timezone
+    const hourInMillis = 3600 * 1000;
+    let startDate = new Date(startInput.value + ':00.000-04:00');
+    
+    // Set default end time to start time + 3 hours
+    let defaultEndDate = new Date(startDate.getTime() + 3 * hourInMillis);
+    
+    // Set minimum end time to start time + 1 hour
+    let minDate = new Date(startDate.getTime() + hourInMillis);
+    
+    // Format dates for input fields (local timezone)
+    endInput.value = defaultEndDate.toISOString().slice(0, -8); // Remove seconds and timezone
+    endInput.min = minDate.toISOString().slice(0, -8);
+    
+    // Show help text
+    helpText.hidden = false;
+    errorLabel.hidden = true;
 }
 
 // Form Validation Functions
@@ -195,30 +209,57 @@ function validateThemes() {
 
 function validateEndDateTimeInput(endInput) {    
     const startInput = document.getElementById('init-datetime');
-    const errorMsg = document.getElementById('end-datetime-error-label');    
+    const errorMsg = document.getElementById('end-datetime-error-label');
+    const helpText = document.getElementById('end-datetime-help');
     
-    if (endInput.value == "" || endInput.value == startInput.value)
+    // If end date is empty, it's valid (will use default)
+    if (!endInput.value) {
+        endInput.classList.remove('error');
+        errorMsg.hidden = true;
+        helpText.hidden = false;
         return true;
+    }
 
     let endDate = new Date(endInput.value+':00.000-04:00');
     let startDate = new Date(startInput.value+':00.000-04:00');
-
-    if (endDate <= startDate) {
+    
+    // Calculate minimum end time (start time + 1 hour)
+    let minEndDate = new Date(startDate.getTime() + 3600000);
+    
+    // Check if end time is at least 1 hour after start time
+    const isValid = endDate >= minEndDate;
+    
+    if (!isValid) {
         endInput.classList.add('error');
+        errorMsg.textContent = 'La fecha de término debe ser al menos 1 hora después del inicio';
     } else {
         endInput.classList.remove('error');
     }
     
-    errorMsg.hidden = (endDate > startDate);
+    errorMsg.hidden = isValid;
+    helpText.hidden = !isValid;
 
-    return (endDate > startDate);
+    return isValid;
 }
 
 function validateDateTime() {
     const startInput = document.getElementById('init-datetime');
-    const endInput = document.getElementById('end-datetime');
     
-    if (endInput.value === "") return true;
+    // Start date must be in the future
+    let now = new Date();
+    let startDate = new Date(startInput.value+':00.000-04:00');
+    
+    if (startDate < now) {
+        startInput.classList.add('error');
+        return false;
+    }
+    startInput.classList.remove('error');
+    
+    // For end time validation, if it's empty we'll use default
+    const endInput = document.getElementById('end-datetime');
+    if (!endInput.value) {
+        return true;
+    }
     
     return validateEndDateTimeInput(endInput);
 }
@@ -286,6 +327,26 @@ function closeImage() {
     overlay.style.display = 'none';
 }
 
+// Form state
+let isSubmitting = false;
+
+function setSubmitting(submitting) {
+    isSubmitting = submitting;
+    const verifyBtn = document.getElementById('verify-btn');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    verifyBtn.disabled = submitting;
+    submitBtn.disabled = submitting;
+    
+    if (submitting) {
+        verifyBtn.textContent = 'Subiendo...';
+        submitBtn.textContent = 'Subiendo...';
+    } else {
+        verifyBtn.textContent = 'Subir Actividad';
+        submitBtn.textContent = 'Enviar';
+    }
+}
+
 // Form Submission and Confirmation Functions
 function showToast(message, type = 'success') {
     const toastContainer = document.getElementById('toast-container');
@@ -351,9 +412,15 @@ function loadForm() {
     // Initialize photo inputs state
     enableOptionalPhotoInputs(false);
     
+    // Initialize region selector
     document.getElementById('region-select').addEventListener("change", enableComuna);
 
+    // Initialize form submission handlers
     document.getElementById('verify-btn').addEventListener('click', () => {
+        if (isSubmitting) {
+            return;
+        }
+        
         if (validateForm()) {
             showConfirmationWindow();
         } else {
@@ -362,14 +429,33 @@ function loadForm() {
     });
 
     // Set up confirm/cancel buttons
-    document.getElementById('close-btn').addEventListener('click', closeConfirmationWindow);
+    document.getElementById('close-btn').addEventListener('click', () => {
+        if (!isSubmitting) {
+            closeConfirmationWindow();
+        }
+    });
+    
     document.getElementById('submit-btn').addEventListener('click', async () => {
-        await submitForm();
-        closeConfirmationWindow();
+        if (!isSubmitting) {
+            await submitForm();
+            closeConfirmationWindow();
+        }
+    });
+
+    // Add form submit handler to prevent default submission
+    document.getElementById('actividad-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        return false;
     });
 }
 
 async function submitForm() {
+    // Prevent multiple submissions
+    if (isSubmitting) {
+        return;
+    }
+    
+    setSubmitting(true);
     const form = document.getElementById('actividad-form');
     const formData = new FormData(form);
 
@@ -396,7 +482,7 @@ async function submitForm() {
     });
 
     try {
-        const response = await fetch(form.action, {
+        const response = await fetch(window.location.href, {
             method: 'POST',
             body: formData
         });
@@ -413,10 +499,12 @@ async function submitForm() {
             if (validationMessages) {
                 validationMessages.scrollIntoView({ behavior: 'smooth' });
             }
+            setSubmitting(false);
         }
     } catch (error) {
         showToast('Error al enviar el formulario', 'error');
         console.error('Error:', error);
+        setSubmitting(false);
     }
 }
 
