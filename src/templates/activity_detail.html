@@ -19,7 +19,7 @@
                 {% if tema.tema == 'otro' %}
                     {{ tema.glosa_otro }}
                 {% else %}
-                    {{ tema.tema }}
+                    {{ tema.tema|capitalize }}
                 {% endif %}
                 {% if not loop.last %}, {% endif %}
             {% endfor %}
@@ -33,7 +33,23 @@
         <p>Contactar por:</p>
         <ul>
             {% for contacto in actividad.contactos %}
-            <li>{{ contacto.nombre }}: {{ contacto.identificador }}</li>
+            <li>
+                {% if contacto.nombre == 'whatsapp' %}
+                    WhatsApp
+                {% elif contacto.nombre == 'telegram' %}
+                    Telegram
+                {% elif contacto.nombre == 'X' %}
+                    X
+                {% elif contacto.nombre == 'instagram' %}
+                    Instagram
+                {% elif contacto.nombre == 'tiktok' %}
+                    Tik-Tok
+                {% elif contacto.nombre == 'otra' %}
+                    Otro
+                {% else %}
+                    {{ contacto.nombre }}
+                {% endif %}: {{ contacto.identificador }}
+            </li>
             {% endfor %}
         </ul>
         {% endif %}

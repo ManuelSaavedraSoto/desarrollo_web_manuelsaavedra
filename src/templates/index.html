@@ -8,6 +8,19 @@
     <title>U-Actividades</title>
 </head>
 <body>
+    <!-- Toast container -->
+    <div id="toast-container"></div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="validation-message {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <div>
         <!-- Title & Message -->
         <h1>U-Actividades</h1>
@@ -65,4 +78,11 @@
         </table>
     </div>
 </body>
+<script>
+    // Check for success parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success')) {
+        showToast('Actividad registrada exitosamente', 'success');
+    }
+</script>
 </html>

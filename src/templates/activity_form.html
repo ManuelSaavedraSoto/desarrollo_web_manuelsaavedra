@@ -8,12 +8,25 @@
     <title>U-Actividades</title>
 </head>
 <body onload="loadForm()">
+    <!-- Toast container -->
+    <div id="toast-container"></div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="validation-message {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <div>
         <h1>Informar una nueva actividad</h1>
         <p>Lorem ipsum Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque pellentesque nibh sit amet nisi eleifend, sed bibendum sem dapibus. Nam suscipit quis arcu a imperdiet.</p>
     </div>
     <div>
-        <form id="actividad-form" action="{{ url_for('activityForm') }}" method="POST">
+        <form id="actividad-form" onsubmit="return false;" action="{{ url_for('activityForm') }}" method="POST" enctype="multipart/form-data">
             <div>
                 <h3>¿Dónde?</h3>
                 <div>

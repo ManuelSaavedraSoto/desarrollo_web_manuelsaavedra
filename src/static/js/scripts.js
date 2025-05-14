@@ -108,25 +108,57 @@ function validateFoto(input) {
     const errorLabel = document.getElementById(`foto-type-error-label-${fileId.split('-')[2]}`);
     const file = input.files[0];
     
+    // Reset error state
+    errorLabel.hidden = true;
+    input.classList.remove('error');
+    
     if (file) {
         const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (!validTypes.includes(file.type)) {
             errorLabel.hidden = false;
             input.value = '';
+            input.classList.add('error');
             return false;
         }
-        errorLabel.hidden = true;
+        
+        // If this is foto-input-1, enable other photo inputs
+        if (fileId === 'foto-input-1') {
+            enableOptionalPhotoInputs(true);
+        }
+        
         return true;
     }
-    errorLabel.hidden = true;
+    
+    // If this is foto-input-1 being cleared, disable other photo inputs
+    if (fileId === 'foto-input-1') {
+        enableOptionalPhotoInputs(false);
+    }
+    
     return true;
 }
 
+function enableOptionalPhotoInputs(enable) {
+    for (let i = 2; i <= 5; i++) {
+        const input = document.getElementById(`foto-input-${i}`);
+        input.disabled = !enable;
+        if (!enable) {
+            input.value = ''; // Clear the input when disabling
+        }
+    }
+}
+
 function validatePhotos() {
-    // Validate required first photo
     const firstPhoto = document.getElementById('foto-input-1');
+    const firstPhotoError = document.getElementById('foto-type-error-label-1');
+    
+    // Reset error states
+    firstPhotoError.hidden = true;
+    firstPhoto.classList.remove('error');
+    
     if (!firstPhoto.files.length) {
-        document.getElementById('foto-type-error-label-1').hidden = false;
+        firstPhoto.classList.add('error');
+        firstPhotoError.textContent = 'La primera foto es obligatoria';
+        firstPhotoError.hidden = false;
         return false;
     }
     
@@ -150,9 +182,12 @@ function validateThemes() {
         return false;
     }
 
-    if (otherThemeCheckbox.checked && (!otherThemeInput.value || otherThemeInput.value.length < 3)) {
-        otherThemeInput.classList.add('error');
-        return false;
+    if (otherThemeCheckbox.checked) {
+        if (!otherThemeInput.value || otherThemeInput.value.length < 3 || otherThemeInput.value.length > 15) {
+            otherThemeInput.classList.add('error');
+            return false;
+        }
+        otherThemeInput.classList.remove('error');
     }
 
     return true;
@@ -252,15 +287,50 @@ function closeImage() {
 }
 
 // Form Submission and Confirmation Functions
+function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    const id = `toast-${Date.now()}`;
+    
+    toast.className = `toast ${type}`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'polite');
+    toast.setAttribute('aria-atomic', 'true');
+    toast.id = id;
+    toast.textContent = message;
+    
+    // Add close button for keyboard accessibility
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '×';
+    closeBtn.setAttribute('aria-label', 'Close notification');
+    closeBtn.style.marginLeft = '10px';
+    closeBtn.style.background = 'none';
+    closeBtn.style.border = 'none';
+    closeBtn.style.color = 'white';
+    closeBtn.style.fontSize = '20px';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.onclick = () => toast.remove();
+    
+    toast.appendChild(closeBtn);
+    toastContainer.appendChild(toast);
+    
+    // Focus management
+    closeBtn.focus();
+    
+    // Remove the toast after animation ends
+    setTimeout(() => {
+        if (document.getElementById(id)) {
+            toast.remove();
+        }
+    }, 3000);
+}
+
 function showConfirmationWindow() {
     const confirmationWindow = document.getElementById('confirmation-window');
     const overlay = document.getElementById('overlay');
 
     confirmationWindow.style.display = 'block';
     overlay.style.display = 'block';
-
-    document.getElementById('close-btn').addEventListener('click', closeConfirmationWindow);
-    document.getElementById('submit-btn').addEventListener('click', submitForm);
 }
 
 function closeConfirmationWindow() {
@@ -278,18 +348,78 @@ function loadForm() {
     now.setTime(now.getTime() - 4 * 3600 * 1000);
     initDateInput.min = now.toISOString().slice(0,-8);
     
+    // Initialize photo inputs state
+    enableOptionalPhotoInputs(false);
+    
     document.getElementById('region-select').addEventListener("change", enableComuna);
 
     document.getElementById('verify-btn').addEventListener('click', () => {
         if (validateForm()) {
             showConfirmationWindow();
         } else {
-            alert('Por favor, complete todos los campos requeridos.');
+            showToast('Por favor, complete todos los campos requeridos correctamente.', 'error');
         }
+    });
+
+    // Set up confirm/cancel buttons
+    document.getElementById('close-btn').addEventListener('click', closeConfirmationWindow);
+    document.getElementById('submit-btn').addEventListener('click', async () => {
+        await submitForm();
+        closeConfirmationWindow();
     });
 }
 
-function submitForm() {
+async function submitForm() {
     const form = document.getElementById('actividad-form');
-    form.submit();
+    const formData = new FormData(form);
+
+    // Add selected themes to form data
+    const selectedThemes = document.querySelectorAll('#theme-inputs input[type="checkbox"]:checked');
+    selectedThemes.forEach((theme, index) => {
+        if (theme.value === 'Otro') {
+            const otherThemeValue = document.getElementById('other-theme-text-input').value;
+            if (otherThemeValue) {
+                formData.append(`theme-${index}`, otherThemeValue);
+            }
+        } else {
+            formData.append(`theme-${index}`, theme.value);
+        }
+    });
+
+    // Add contact methods to form data
+    const selectedContacts = document.querySelectorAll('#contact-methods input[type="checkbox"]:checked');
+    selectedContacts.forEach((contact, index) => {
+        const method = contact.value;
+        const identifier = document.getElementById(`contact-${method}-input`).value;
+        formData.append(`contact-method-${index}`, method);
+        formData.append(`contact-identifier-${index}`, identifier);
+    });
+
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            // Redirect immediately on success, toast will be shown on index page
+            window.location.href = '/?success=true';
+        } else {
+            showToast(result.error || 'Error al procesar el formulario', 'error');
+            // Keep form visible and scroll to any validation messages
+            const validationMessages = document.querySelector('.validation-message');
+            if (validationMessages) {
+                validationMessages.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    } catch (error) {
+        showToast('Error al enviar el formulario', 'error');
+        console.error('Error:', error);
+    }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadForm();
+});

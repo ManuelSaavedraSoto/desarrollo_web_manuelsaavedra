@@ -34,7 +34,7 @@
                         {% if tema.tema == 'otro' %}
                             {{ tema.glosa_otro }}
                         {% else %}
-                            {{ tema.tema }}
+                            {{ tema.tema|capitalize }}
                         {% endif %}
                         {% if not loop.last %}, {% endif %}
                     {% endfor %}

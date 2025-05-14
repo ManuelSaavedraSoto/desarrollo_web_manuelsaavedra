@@ -111,13 +111,15 @@
 
         // Activities per Theme
         const themeData = chartData.theme_counts;
+        // Capitalize theme names
+        const themes = Object.keys(themeData).map(theme => theme.charAt(0).toUpperCase() + theme.slice(1));
         // Sort themes to put "Otros" at the end
-        const themes = Object.keys(themeData).sort((a, b) => {
+        themes.sort((a, b) => {
             if (a === 'Otros') return 1;
             if (b === 'Otros') return -1;
             return a.localeCompare(b);
         });
-        const themeCounts = themes.map(theme => themeData[theme]);
+        const themeCounts = themes.map(theme => themeData[theme.toLowerCase()]);
 
         // Generate colors based on number of themes
         const colors = themes.map((theme, i) => {
