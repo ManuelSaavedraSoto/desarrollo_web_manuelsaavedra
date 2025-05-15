@@ -1,14 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
-    <title>U-Actividades - Detalles</title>
-</head>
-<body>
-    <div class="container">
+{% extends "layout.html" %}
+
+{% block title %} / Detalles{% endblock %}
+
+{% block content %}
         <h1>Detalles de la Actividad</h1>
         
         <div class="nav-buttons">
@@ -104,5 +98,4 @@
         <img id="enlarged-image" alt="Imagen Ampliada">
     </div>
     <div id="overlay" class="overlay" onclick="closeImage()"></div>
-</body>
-</html>
+{% endblock %}

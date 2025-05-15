@@ -1,5 +1,5 @@
 // Form Input Handling Functions
-function enableComuna(event) {
+function handleComuna(event) {
     const comunaSelect = document.getElementById('comuna-select');
     const selectedRegionId = event.target.value;
     
@@ -53,14 +53,13 @@ function handleContactSelection(selectedOption) {
     });
 }
 
-function updateEndDateTimeInput(startInput) {
+function handleEndDateTimeInput(startInput) {
     if (startInput.classList.contains('error')) {
         startInput.classList.remove('error');
     }
     
     const endInput = document.getElementById('end-datetime');
     const errorLabel = document.getElementById('end-datetime-error-label');
-    const helpText = document.getElementById('end-datetime-help');
     
     if (!startInput.value) {
         endInput.value = '';
@@ -81,9 +80,17 @@ function updateEndDateTimeInput(startInput) {
     endInput.value = defaultEndDate.toISOString().slice(0, -8); // Remove seconds and timezone
     endInput.min = minDate.toISOString().slice(0, -8);
     
-    // Show help text
-    helpText.hidden = false;
     errorLabel.hidden = true;
+}
+
+function handleOptionalPhotoInputs(enable) {
+    for (let i = 2; i <= 5; i++) {
+        const input = document.getElementById(`foto-input-${i}`);
+        input.disabled = !enable;
+        if (!enable) {
+            input.value = ''; // Clear the input when disabling
+        }
+    }
 }
 
 // Form Validation Functions
@@ -137,7 +144,7 @@ function validateFoto(input) {
         
         // If this is foto-input-1, enable other photo inputs
         if (fileId === 'foto-input-1') {
-            enableOptionalPhotoInputs(true);
+            handleOptionalPhotoInputs(true);
         }
         
         return true;
@@ -145,20 +152,10 @@ function validateFoto(input) {
     
     // If this is foto-input-1 being cleared, disable other photo inputs
     if (fileId === 'foto-input-1') {
-        enableOptionalPhotoInputs(false);
+        handleOptionalPhotoInputs(false);
     }
     
     return true;
-}
-
-function enableOptionalPhotoInputs(enable) {
-    for (let i = 2; i <= 5; i++) {
-        const input = document.getElementById(`foto-input-${i}`);
-        input.disabled = !enable;
-        if (!enable) {
-            input.value = ''; // Clear the input when disabling
-        }
-    }
 }
 
 function validatePhotos() {
@@ -210,13 +207,11 @@ function validateThemes() {
 function validateEndDateTimeInput(endInput) {    
     const startInput = document.getElementById('init-datetime');
     const errorMsg = document.getElementById('end-datetime-error-label');
-    const helpText = document.getElementById('end-datetime-help');
     
     // If end date is empty, it's valid (will use default)
     if (!endInput.value) {
         endInput.classList.remove('error');
         errorMsg.hidden = true;
-        helpText.hidden = false;
         return true;
     }
 
@@ -237,7 +232,6 @@ function validateEndDateTimeInput(endInput) {
     }
     
     errorMsg.hidden = isValid;
-    helpText.hidden = !isValid;
 
     return isValid;
 }
@@ -291,40 +285,7 @@ function validateForm() {
         validatePhotos()
     );
 
-    if (!isValid) {
-        alert('Por favor, complete todos los campos requeridos correctamente.');
-    }
-
     return isValid;
-}
-
-// UI/Window Management Functions
-function toggleWindow(rowId) {
-    const window = document.getElementById(`window-${rowId}`);
-    const overlay = document.getElementById('overlay');
-    if (window.style.display === 'none' || window.style.display === '') {
-        window.style.display = 'block';
-        overlay.style.display = 'block';
-    } else {
-        window.style.display = 'none';
-        overlay.style.display = 'none';
-    }
-}
-
-function showImage(src) {
-    const imageWindow = document.getElementById('image-window');
-    const overlay = document.getElementById('overlay');
-    const enlargedImage = document.getElementById('enlarged-image');
-    enlargedImage.src = src;
-    imageWindow.style.display = 'block';
-    overlay.style.display = 'block';
-}
-
-function closeImage() {
-    const imageWindow = document.getElementById('image-window');
-    const overlay = document.getElementById('overlay');
-    imageWindow.style.display = 'none';
-    overlay.style.display = 'none';
 }
 
 // Form state
@@ -347,61 +308,7 @@ function setSubmitting(submitting) {
     }
 }
 
-// Form Submission and Confirmation Functions
-function showToast(message, type = 'success') {
-    const toastContainer = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    const id = `toast-${Date.now()}`;
-    
-    toast.className = `toast ${type}`;
-    toast.setAttribute('role', 'alert');
-    toast.setAttribute('aria-live', 'polite');
-    toast.setAttribute('aria-atomic', 'true');
-    toast.id = id;
-    toast.textContent = message;
-    
-    // Add close button for keyboard accessibility
-    const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = '×';
-    closeBtn.setAttribute('aria-label', 'Close notification');
-    closeBtn.style.marginLeft = '10px';
-    closeBtn.style.background = 'none';
-    closeBtn.style.border = 'none';
-    closeBtn.style.color = 'white';
-    closeBtn.style.fontSize = '20px';
-    closeBtn.style.cursor = 'pointer';
-    closeBtn.onclick = () => toast.remove();
-    
-    toast.appendChild(closeBtn);
-    toastContainer.appendChild(toast);
-    
-    // Focus management
-    closeBtn.focus();
-    
-    // Remove the toast after animation ends
-    setTimeout(() => {
-        if (document.getElementById(id)) {
-            toast.remove();
-        }
-    }, 3000);
-}
-
-function showConfirmationWindow() {
-    const confirmationWindow = document.getElementById('confirmation-window');
-    const overlay = document.getElementById('overlay');
-
-    confirmationWindow.style.display = 'block';
-    overlay.style.display = 'block';
-}
-
-function closeConfirmationWindow() {
-    const confirmationWindow = document.getElementById('confirmation-window');
-    const overlay = document.getElementById('overlay');
-
-    confirmationWindow.style.display = 'none';
-    overlay.style.display = 'none';
-}
-
+// Form Submission Functions
 function loadForm() {
     const initDateInput = document.getElementById("init-datetime");
 
@@ -410,10 +317,10 @@ function loadForm() {
     initDateInput.min = now.toISOString().slice(0,-8);
     
     // Initialize photo inputs state
-    enableOptionalPhotoInputs(false);
+    handleOptionalPhotoInputs(false);
     
     // Initialize region selector
-    document.getElementById('region-select').addEventListener("change", enableComuna);
+    document.getElementById('region-select').addEventListener("change", handleComuna);
 
     // Initialize form submission handlers
     document.getElementById('verify-btn').addEventListener('click', () => {
@@ -422,7 +329,7 @@ function loadForm() {
         }
         
         if (validateForm()) {
-            showConfirmationWindow();
+            toggleWindow('confirmation');
         } else {
             showToast('Por favor, complete todos los campos requeridos correctamente.', 'error');
         }
@@ -431,14 +338,14 @@ function loadForm() {
     // Set up confirm/cancel buttons
     document.getElementById('close-btn').addEventListener('click', () => {
         if (!isSubmitting) {
-            closeConfirmationWindow();
+            toggleWindow('confirmation');
         }
     });
     
     document.getElementById('submit-btn').addEventListener('click', async () => {
         if (!isSubmitting) {
             await submitForm();
-            closeConfirmationWindow();
+            toggleWindow('confirmation');
         }
     });
 

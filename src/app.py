@@ -31,35 +31,6 @@ def cleanup(exception=None):  # pylint: disable=unused-argument
     Session.remove()
 
 
-def handle_activity_post(session, req):
-    """Handles the POST request for activity creation."""
-    try:
-        inputs = get_inputs(req)
-        errors = validate_inputs(inputs, session)
-
-        if errors:
-            return jsonify({"error": " | ".join(errors)}), 400
-
-        actividad = create_activity(inputs)
-        session.add(actividad)
-        session.flush()
-
-        # Process all activity data
-        process_photos(session, req, actividad.id, app.config["UPLOAD_FOLDER"])
-        process_themes(session, inputs["themes"], actividad.id)
-        process_contact_methods(session, req, actividad.id)
-
-        session.commit()
-        return jsonify({"success": True}), 200
-
-    except ValueError as val_err:
-        session.rollback()
-        return jsonify({"error": str(val_err)}), 400
-    except Exception as err:  # pylint: disable=broad-except
-        session.rollback()
-        return jsonify({"error": f"Error inesperado: {str(err)}"}), 500
-
-
 @app.route("/", methods=["GET"])
 def index():
     """Route for the main page."""
@@ -69,8 +40,6 @@ def index():
         actividades = (
             session.query(Actividad).order_by(Actividad.id.desc()).limit(5).all()
         )
-        # Reverse the list to show in ascending order
-        actividades = actividades[::-1]
         return render_template("index.html", actividades=actividades)
     finally:
         session.close()
@@ -79,21 +48,22 @@ def index():
 @app.route("/actividades", methods=["GET"])
 def activity_list():
     """Route for the activity list page."""
+    return render_template("activity_list.html")
+
+
+@app.route("/api/actividades", methods=["GET"])
+def get_paginated_activities():
+    """API endpoint for paginated activities."""
     session = Session()
     try:
-        # Get page number from query parameters, default to 1
         page = request.args.get("page", 1, type=int)
-        per_page = 5  # Number of items per page
+        per_page = 5
 
-        # Get total count of activities
         total_activities = session.query(Actividad).count()
         total_pages = (total_activities + per_page - 1) // per_page
-
-        # Ensure page is within valid range
         page = max(1, min(page, total_pages))
 
-        # Get paginated activities ordered by ID
-        paginated_activities = (
+        activities = (
             session.query(Actividad)
             .order_by(Actividad.id.desc())
             .offset((page - 1) * per_page)
@@ -101,11 +71,35 @@ def activity_list():
             .all()
         )
 
-        return render_template(
-            "activity_list.html",
-            paginated_activities=paginated_activities,
-            current_page=page,
-            total_pages=total_pages,
+        # Convert activities to JSON-serializable format
+        activities_data = []
+        for activity in activities:
+            activities_data.append(
+                {
+                    "id": activity.id,
+                    "nombre": activity.nombre,
+                    "inicio": activity.dia_hora_inicio.strftime("%Y-%m-%d %H:%M"),
+                    "termino": (
+                        activity.dia_hora_termino.strftime("%Y-%m-%d %H:%M")
+                        if activity.dia_hora_termino
+                        else None
+                    ),
+                    "comuna": activity.comuna.nombre,
+                    "sector": activity.sector,
+                    "temas": [
+                        t.tema.capitalize() if t.tema != "otro" else t.glosa_otro
+                        for t in activity.temas
+                    ],
+                    "num_fotos": len(activity.fotos),
+                }
+            )
+
+        return jsonify(
+            {
+                "activities": activities_data,
+                "current_page": page,
+                "total_pages": total_pages,
+            }
         )
     finally:
         session.close()
@@ -151,6 +145,35 @@ def activity_stats():
         return render_template("activity_stats.html", chart_data=json.dumps(chart_data))
     finally:
         session.close()
+
+
+def handle_activity_post(session, req):
+    """Handles the POST request for activity creation."""
+    try:
+        inputs = get_inputs(req)
+        errors = validate_inputs(inputs, session)
+
+        if errors:
+            return jsonify({"error": " | ".join(errors)}), 400
+
+        actividad = create_activity(inputs)
+        session.add(actividad)
+        session.flush()
+
+        # Process all activity data
+        process_photos(session, req, actividad.id, app.config["UPLOAD_FOLDER"])
+        process_themes(session, inputs["themes"], actividad.id)
+        process_contact_methods(session, req, actividad.id)
+
+        session.commit()
+        return jsonify({"success": True}), 200
+
+    except ValueError as val_err:
+        session.rollback()
+        return jsonify({"error": str(val_err)}), 400
+    except Exception as err:  # pylint: disable=broad-except
+        session.rollback()
+        return jsonify({"error": f"Error inesperado: {str(err)}"}), 500
 
 
 @app.route("/actividades/subir", methods=["GET", "POST"])

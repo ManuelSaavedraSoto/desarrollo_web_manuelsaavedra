@@ -1,26 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
-    <title>U-Actividades</title>
-</head>
-<body>
-    <div class="container">
-        <!-- Toast container -->
-        <div id="toast-container"></div>
+{% extends "layout.html" %}
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="validation-message {{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+{% block content %}
 
         <!-- Title & Message -->
         <h1>U-Actividades</h1>
@@ -59,7 +39,7 @@
                                 {% if tema.tema == 'otro' %}
                                     {{ tema.glosa_otro }}
                                 {% else %}
-                                    {{ tema.tema }}
+                                    {{ tema.tema|capitalize }}
                                 {% endif %}
                                 {% if not loop.last %}, {% endif %}
                             {% endfor %}
@@ -77,7 +57,9 @@
             </table>
         </div>
     </div>
-</body>
+{% endblock %}
+
+{% block scripts %}
 <script>
     // Check for success parameter in URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -85,4 +67,4 @@
         showToast('Actividad registrada exitosamente', 'success');
     }
 </script>
-</html>
+{% endblock %}

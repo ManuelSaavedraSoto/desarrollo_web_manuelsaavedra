@@ -1,14 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
-    <title>U-Actividades - Lista</title>
-</head>
-<body>
-    <div class="container">
+{% extends "layout.html" %}
+
+{% block title %} / Lista de Actividades{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/activity_list.js') }}"></script>
+{% endblock %}
+
+{% block content %}
         <h1>Lista de Actividades</h1>
         <div class="nav-buttons">
             <button onclick="window.location.href='{{ url_for('index') }}'">Volver a Inicio</button>
@@ -28,55 +27,15 @@
                         <th>Fotos</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for actividad in paginated_activities %}
-                    <tr onclick="window.location.href='{{ url_for('activity_detail', activity_id=actividad.id) }}'" class="btn-row">
-                        <td>{{ actividad.dia_hora_inicio.strftime('%d-%m-%Y %H:%M') }}</td>
-                        <td>{{ actividad.dia_hora_termino.strftime('%d-%m-%Y %H:%M') if actividad.dia_hora_termino else 'No especificado' }}</td>
-                        <td>{{ actividad.comuna.nombre }}</td>
-                        <td>{{ actividad.sector if actividad.sector else 'No especificado' }}</td>
-                        <td>
-                            {% for tema in actividad.temas %}
-                                {% if tema.tema == 'otro' %}
-                                    {{ tema.glosa_otro }}
-                                {% else %}
-                                    {{ tema.tema|capitalize }}
-                                {% endif %}
-                                {% if not loop.last %}, {% endif %}
-                            {% endfor %}
-                        </td>
-                        <td>{{ actividad.nombre }}</td>
-                        <td>{{ actividad.fotos|length }}</td>
-                    </tr>
-                    {% endfor %}
+                <tbody id="activities-table-body">
+                    <!-- Activities will be loaded here -->
                 </tbody>
             </table>
 
             <!-- Pagination -->
-            {% if total_pages > 1 %}
-            <div class="pagination">
-                {% if current_page > 1 %}
-                <button onclick="window.location.href='{{ url_for('activity_list', page=current_page-1) }}'">
-                    &laquo; Anterior
-                </button>
-                {% endif %}
-
-                {% for page_num in range(1, total_pages + 1) %}
-                <button 
-                    onclick="window.location.href='{{ url_for('activity_list', page=page_num) }}'"
-                    class="{{ 'active' if page_num == current_page else '' }}">
-                    {{ page_num }}
-                </button>
-                {% endfor %}
-
-                {% if current_page < total_pages %}
-                <button onclick="window.location.href='{{ url_for('activity_list', page=current_page+1) }}'">
-                    Siguiente &raquo;
-                </button>
-                {% endif %}
+            <div id="pagination" class="pagination">
+                <!-- Pagination will be loaded here -->
             </div>
-            {% endif %}
         </div>
     </div>
-</body>
-</html>
+{% endblock %}

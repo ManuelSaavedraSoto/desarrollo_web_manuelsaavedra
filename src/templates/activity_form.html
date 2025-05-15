@@ -1,25 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
-    <title>U-Actividades</title>
-</head>
-<body onload="loadForm()">
-    <!-- Toast container -->
-    <div id="toast-container"></div>
+{% extends "layout.html" %}
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="validation-message {{ category }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+{% block title %} / Informar Actividad{% endblock %}
+{% block head %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/activity_form.js') }}"></script>
+{% endblock %}
+
+
+{% block content %}
 
     <div>
         <h1>Informar una nueva actividad</h1>
@@ -95,31 +83,32 @@
             </div>
             <br>
             <div>
-                <label>Métodos de Contacto:</label>
-                <div id="contact-methods">
-                    <label>
-                        <input type="checkbox" value="whatsapp" onchange="handleContactSelection(this)"> WhatsApp
-                    </label>
-                    <br>
-                    <label>
-                        <input type="checkbox" value="telegram" onchange="handleContactSelection(this)"> Telegram
-                    </label>
-                    <br>
-                    <label>
-                        <input type="checkbox" value="x" onchange="handleContactSelection(this)"> X
-                    </label>
-                    <br>
-                    <label>
-                        <input type="checkbox" value="instagram" onchange="handleContactSelection(this)"> Instagram
-                    </label>
-                    <br>
-                    <label>
-                        <input type="checkbox" value="tik-tok" onchange="handleContactSelection(this)"> Tik-Tok
-                    </label>
-                    <br>
-                    <label>
-                        <input type="checkbox" value="otra" onchange="handleContactSelection(this)"> Otra
-                    </label>
+                <h4>Métodos de Contacto:</h4>
+                <div id="contact-methods" class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="contact-whatsapp-check" value="whatsapp" onchange="handleContactSelection(this)">
+                        <label for="contact-whatsapp-check">WhatsApp</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="contact-telegram-check" value="telegram" onchange="handleContactSelection(this)">
+                        <label for="contact-telegram-check">Telegram</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="contact-x-check" value="x" onchange="handleContactSelection(this)">
+                        <label for="contact-x-check">X</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="contact-instagram-check" value="instagram" onchange="handleContactSelection(this)">
+                        <label for="contact-instagram-check">Instagram</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="contact-tiktok-check" value="tik-tok" onchange="handleContactSelection(this)">
+                        <label for="contact-tiktok-check">Tik-Tok</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="contact-otra-check" value="otra" onchange="handleContactSelection(this)">
+                        <label for="contact-otra-check">Otra</label>
+                    </div>
                 </div>
                 <div id="contact-inputs">
                     <div style="margin-top: 10px;" id="contact-whatsapp" hidden>
@@ -166,7 +155,6 @@
                 <div>
                     <label for="end-datetime">Día/Hora Término (opcional): </label>
                     <input type="datetime-local" name="end-input" id="end-datetime" onchange="validateEndDateTimeInput(this)">
-                    <label for="end-datetime" style="color: dimgrey;" id="end-datetime-help">Si no se especifica, se asumirá 3 horas después del inicio</label>
                     <label for="end-datetime" style="color: red;" id="end-datetime-error-label" hidden>La fecha de término debe ser al menos 1 hora después del inicio</label>
                 </div>
                 <br>
@@ -177,26 +165,47 @@
                 <br>
                 <div>
                     <label>Tema: </label>
-                    <div id="theme-inputs">
-                        <label class="checkbox-label"><input type="checkbox" value="Música"> Música</label>
-                        <br>
-                        <label class="checkbox-label"><input type="checkbox" value="Deporte"> Deporte</label>
-                        <br>
-                        <label class="checkbox-label"><input type="checkbox" value="Ciencias"> Ciencias</label>
-                        <br>
-                        <label class="checkbox-label"><input type="checkbox" value="Religión"> Religión</label>
-                        <br>
-                        <label class="checkbox-label"><input type="checkbox" value="Política"> Política</label>
-                        <br>
-                        <label class="checkbox-label"><input type="checkbox" value="Tecnología"> Tecnología</label>
-                        <br>
-                        <label class="checkbox-label"><input type="checkbox" value="Juegos"> Juegos</label>
-                        <br>
-                        <label class="checkbox-label"><input type="checkbox" value="Baile"> Baile</label>
-                        <br>
-                        <label class="checkbox-label"><input type="checkbox" value="Comida"> Comida</label>
-                        <br>
-                        <label class="checkbox-label"><input type="checkbox" value="Otro" onchange="handleThemeSelection(this)"> Otro</label>
+                    <div id="theme-inputs" class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="theme-musica" value="Música">
+                            <label for="theme-musica">Música</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="theme-deporte" value="Deporte">
+                            <label for="theme-deporte">Deporte</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="theme-ciencias" value="Ciencias">
+                            <label for="theme-ciencias">Ciencias</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="theme-religion" value="Religión">
+                            <label for="theme-religion">Religión</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="theme-politica" value="Política">
+                            <label for="theme-politica">Política</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="theme-tecnologia" value="Tecnología">
+                            <label for="theme-tecnologia">Tecnología</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="theme-juegos" value="Juegos">
+                            <label for="theme-juegos">Juegos</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="theme-baile" value="Baile">
+                            <label for="theme-baile">Baile</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="theme-comida" value="Comida">
+                            <label for="theme-comida">Comida</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="theme-otro" value="Otro" onchange="handleThemeSelection(this)">
+                            <label for="theme-otro">Otro</label>
+                        </div>
                         <div id="other-theme-input" style="margin-top: 10px;" hidden>
                             <label for="other-theme-text-input">Otro: </label>
                             <input type="text" name="other-theme" id="other-theme-text-input" minlength="3" maxlength="15">
@@ -205,30 +214,34 @@
                 </div>
                 <br>
                 <div>
-                    <label>Fotos:</label>
+                    <h3>Fotos:</h3>
                     <div id="photo-inputs">
                         <div class="photo-input-group">
-                            <label for="foto-input-1">Foto 1 (obligatoria):</label>
+                            <label for="foto-input-1">Foto 1 </label>
                             <input accept=".png, .jpg, .jpeg" type="file" name="foto-input-1" id="foto-input-1" required onchange="validateFoto(this)">
                             <label for="foto-input-1" style="color: red;" id="foto-type-error-label-1" hidden>Solo se permiten fotos</label>
                         </div>
                         <div class="photo-input-group">
-                            <label for="foto-input-2">Foto 2 (opcional):</label>
+                            <label for="foto-input-2">Foto 2 </label>
+                            <label for="foto-input-2" style="color: dimgrey;">(opcional)</label>
                             <input accept=".png, .jpg, .jpeg" type="file" name="foto-input-2" id="foto-input-2" onchange="validateFoto(this)">
                             <label for="foto-input-2" style="color: red;" id="foto-type-error-label-2" hidden>Solo se permiten fotos</label>
                         </div>
                         <div class="photo-input-group">
-                            <label for="foto-input-3">Foto 3 (opcional):</label>
+                            <label for="foto-input-3">Foto 3 </label>
+                            <label for="foto-input-3" style="color: dimgrey;">(opcional)</label>
                             <input accept=".png, .jpg, .jpeg" type="file" name="foto-input-3" id="foto-input-3" onchange="validateFoto(this)">
                             <label for="foto-input-3" style="color: red;" id="foto-type-error-label-3" hidden>Solo se permiten fotos</label>
                         </div>
                         <div class="photo-input-group">
-                            <label for="foto-input-4">Foto 4 (opcional):</label>
+                            <label for="foto-input-4">Foto 4 </label>
+                            <label for="foto-input-4" style="color: dimgrey;">(opcional)</label>
                             <input accept=".png, .jpg, .jpeg" type="file" name="foto-input-4" id="foto-input-4" onchange="validateFoto(this)">
                             <label for="foto-input-4" style="color: red;" id="foto-type-error-label-4" hidden>Solo se permiten fotos</label>
                         </div>
                         <div class="photo-input-group">
-                            <label for="foto-input-5">Foto 5 (opcional):</label>
+                            <label for="foto-input-5">Foto 5 </label>
+                            <label for="foto-input-5" style="color: dimgrey;">(opcional)</label>
                             <input accept=".png, .jpg, .jpeg" type="file" name="foto-input-5" id="foto-input-5" onchange="validateFoto(this)">
                             <label for="foto-input-5" style="color: red;" id="foto-type-error-label-5" hidden>Solo se permiten fotos</label>
                         </div>
@@ -242,7 +255,7 @@
         <button type="button" onclick="window.location.href='{{ url_for('index') }}'">Volver a Inicio</button>
         <button type="button" id="verify-btn">Subir Actividad</button>
     </div>
-    <div id="confirmation-window" class="floating-window">
+    <div id="window-confirmation" class="floating-window">
         <h3>Confirmar Actividad</h3>
         <p>¿Está seguro de que desea enviar esta actividad?</p>
         <button id="submit-btn" type="button">Enviar</button>
@@ -259,5 +272,4 @@
         </div>
         {% endfor %}
     </div>
-</body>
-</html>
+{% endblock %}
