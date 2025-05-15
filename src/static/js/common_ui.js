@@ -1,7 +1,8 @@
 // UI/Window Management Functions
-function toggleWindow(windowId) {
+function toggleWindow(windowId, src=null) {
     const window = document.getElementById(`window-${windowId}`);
     const overlay = document.getElementById('overlay');
+
     if (window.style.display === 'none' || window.style.display === '') {
         window.style.display = 'block';
         overlay.style.display = 'block';
@@ -9,22 +10,11 @@ function toggleWindow(windowId) {
         window.style.display = 'none';
         overlay.style.display = 'none';
     }
-}
 
-function showImage(src) {
-    const imageWindow = document.getElementById('image-window');
-    const overlay = document.getElementById('overlay');
-    const enlargedImage = document.getElementById('enlarged-image');
-    enlargedImage.src = src;
-    imageWindow.style.display = 'block';
-    overlay.style.display = 'block';
-}
-
-function closeImage() {
-    const imageWindow = document.getElementById('image-window');
-    const overlay = document.getElementById('overlay');
-    imageWindow.style.display = 'none';
-    overlay.style.display = 'none';
+    if (windowId === 'image' && src) {
+        const enlargedImage = document.getElementById('enlarged-image');
+        enlargedImage.src = src;
+    }
 }
 
 function showToast(message, type = 'success') {

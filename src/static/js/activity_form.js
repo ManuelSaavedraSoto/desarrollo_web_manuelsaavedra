@@ -1,4 +1,20 @@
 // Form Input Handling Functions
+var regionJSON = null;
+
+async function fetchRegions() {
+    try {
+        const response = await fetch('/api/regiones');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        regionJSON = data;
+
+    }  catch (error) {
+        console.error('Error:', error);
+    }
+}
+
 function handleComuna(event) {
     const comunaSelect = document.getElementById('comuna-select');
     const selectedRegionId = event.target.value;
@@ -7,14 +23,16 @@ function handleComuna(event) {
     comunaSelect.disabled = false;
     comunaSelect.innerHTML = '<option value="" selected disabled>Por favor elija una comuna.</option>';
     
-    // Get comunas for the selected region from hidden container
-    const regionContainer = document.querySelector(`.region-comunas[data-region-id="${selectedRegionId}"]`);
-    if (regionContainer) {
-        const comunaItems = regionContainer.querySelectorAll('.comuna-item');
-        comunaItems.forEach(comuna => {
+    // Find selected region in fetched JSON
+    const selectedRegion = regionJSON.find(region => region.id === parseInt(selectedRegionId));
+    
+    if (!(selectedRegion === undefined)) {
+        comunaSelect.classList.remove('error');
+        // Populate comuna select with options
+        selectedRegion.comunas.forEach(comuna => {
             const option = document.createElement('option');
-            option.value = comuna.dataset.comunaId;
-            option.textContent = comuna.dataset.comunaName;
+            option.value = comuna.id;
+            option.textContent = comuna.nombre;
             comunaSelect.appendChild(option);
         });
     }
@@ -76,10 +94,15 @@ function handleEndDateTimeInput(startInput) {
     // Set minimum end time to start time + 1 hour
     let minDate = new Date(startDate.getTime() + hourInMillis);
     
+    // "Mask" timezone offset
+    defaultEndDate.setHours(defaultEndDate.getHours() - 4);
+    minDate.setHours(minDate.getHours() - 4);
+
     // Format dates for input fields (local timezone)
     endInput.value = defaultEndDate.toISOString().slice(0, -8); // Remove seconds and timezone
     endInput.min = minDate.toISOString().slice(0, -8);
-    
+    endInput.disabled = false;
+
     errorLabel.hidden = true;
 }
 
@@ -94,6 +117,42 @@ function handleOptionalPhotoInputs(enable) {
 }
 
 // Form Validation Functions
+function validateName() {
+    const nameInput = document.getElementById('name-input');
+    let isValid = true;
+
+    if (!nameInput.value || nameInput.value.length > 200) {
+        nameInput.classList.add('error');
+        isValid = false;
+    } else {
+        nameInput.classList.remove('error');
+    }
+
+    return isValid;
+}
+
+function validateRegionComuna() {
+    const regionSelect = document.getElementById('region-select');
+    const comunaSelect = document.getElementById('comuna-select');
+    const regionData = regionJSON.find(region => region.id === parseInt(regionSelect.value));
+    
+    if (!(regionData === undefined)) {
+        const selectedComuna = regionData.comunas.find(comuna => comuna.id === parseInt(comunaSelect.value));
+        if (!(selectedComuna === undefined)) {
+            regionSelect.classList.remove('error');
+            comunaSelect.classList.remove('error');
+            return true;
+        } else {
+            comunaSelect.classList.add('error');
+            return false;
+        }
+    } else {
+        regionSelect.classList.add('error');
+        comunaSelect.classList.add('error');
+        return false;
+    }
+}
+
 function validateEmail() {
     const emailInput = document.getElementById('email-input');
     let isValid = true;
@@ -190,6 +249,10 @@ function validateThemes() {
     const otherThemeInput = document.getElementById('other-theme-text-input');
 
     if (selectedThemes.length === 0) {
+        const themes = document.querySelectorAll('#theme-inputs');
+        themes.forEach(theme => {
+            theme.classList.add('error');
+        });
         return false;
     }
 
@@ -239,10 +302,15 @@ function validateEndDateTimeInput(endInput) {
 function validateDateTime() {
     const startInput = document.getElementById('init-datetime');
     
+    if (!startInput.value) {
+        startInput.classList.add('error');
+        return false;
+    }
+
     // Start date must be in the future
     let now = new Date();
     let startDate = new Date(startInput.value+':00.000-04:00');
-    
+
     if (startDate < now) {
         startInput.classList.add('error');
         return false;
@@ -262,8 +330,14 @@ function validateContacts() {
     const selectedMethods = document.querySelectorAll('#contact-methods input:checked');
     const selectedMethodsArr = Array.from(selectedMethods);
     
-    if (selectedMethodsArr.length === 0) return false;
-    
+    if (selectedMethodsArr.length === 0) {
+        const methods = document.querySelectorAll('#contact-methods');
+        methods.forEach(method => {
+            method.classList.add('error');
+        });
+        return false;
+    }
+
     for (let method of selectedMethodsArr) {
         const input = document.getElementById(`contact-${method.value}-input`);
         if (!input.value || input.value.length < 4) {
@@ -276,16 +350,29 @@ function validateContacts() {
 }
 
 function validateForm() {
-    const isValid = (
-        validateEmail() &&
-        validateTel() &&
-        validateDateTime() &&
-        validateContacts() &&
-        validateThemes() &&
-        validatePhotos()
-    );
+    // Run all validations and track results
+    const validations = {
+        'Nombre': validateName(),
+        'Región/Comuna': validateRegionComuna(),
+        'Email': validateEmail(),
+        'Teléfono': validateTel(),
+        'Fecha/Hora': validateDateTime(),
+        'Métodos de contacto': validateContacts(),
+        'Temas': validateThemes(),
+        'Fotos': validatePhotos()
+    };
 
-    return isValid;
+    // Find all failed validations
+    const failures = Object.entries(validations)
+        .filter(([_, passed]) => !passed)
+        .map(([field, _]) => field);
+
+    if (failures.length > 0) {
+        showToast(`Por favor revise: ${failures.join(', ')}`, 'error');
+        return false;
+    }
+
+    return true;
 }
 
 // Form state
@@ -330,8 +417,6 @@ function loadForm() {
         
         if (validateForm()) {
             toggleWindow('confirmation');
-        } else {
-            showToast('Por favor, complete todos los campos requeridos correctamente.', 'error');
         }
     });
 
@@ -416,5 +501,7 @@ async function submitForm() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadForm();
+    fetchRegions().then(() => {
+        loadForm();
+    })
 });

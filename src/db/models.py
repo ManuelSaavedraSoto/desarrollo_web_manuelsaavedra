@@ -1,32 +1,9 @@
 # pylint: disable=too-few-public-methods
-"""DB connection and ORM models for the application."""
+"""ORM models for the application."""
 
-from sqlalchemy import (
-    create_engine,
-    Column,
-    Integer,
-    String,
-    DateTime,
-    ForeignKey,
-    Enum,
-)
-from sqlalchemy.orm import sessionmaker, relationship, scoped_session
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.pool import QueuePool
-
-engine = create_engine(
-    "mysql+pymysql://cc5002:programacionweb@localhost:3306/tarea2",
-    poolclass=QueuePool,
-    pool_size=10,
-    max_overflow=20,
-    pool_pre_ping=True,
-    pool_recycle=3600,
-)
-
-session_factory = sessionmaker(bind=engine)
-Session = scoped_session(session_factory)
-
-Base = declarative_base()
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum
+from sqlalchemy.orm import relationship
+from .connection import Base
 
 
 class Region(Base):
@@ -143,7 +120,3 @@ class ActividadTema(Base):
 
     # Relationships
     actividad = relationship("Actividad", back_populates="temas")
-
-
-# Create all tables
-Base.metadata.create_all(engine)

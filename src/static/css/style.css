@@ -287,7 +287,7 @@ button:disabled {
     transform: translate(-50%, -50%);
     width: 840px; /* 800px + 2 * padding */
     height: 640px; /* 600px + 2 * padding */
-    background-color: black;
+    background-color: lightgray;
     z-index: 1000;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     text-align: center;

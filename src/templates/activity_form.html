@@ -149,12 +149,12 @@
                 <h3>¿Cuándo y de qué trata?</h3>
                 <div>
                     <label for="init-datetime">Día/Hora Inicio: </label>
-                    <input type="datetime-local" name="init-input" id="init-datetime" required onchange="updateEndDateTimeInput(this)">
+                    <input type="datetime-local" name="init-input" id="init-datetime" required onchange="handleEndDateTimeInput(this)">
                 </div>
                 <br>
                 <div>
                     <label for="end-datetime">Día/Hora Término (opcional): </label>
-                    <input type="datetime-local" name="end-input" id="end-datetime" onchange="validateEndDateTimeInput(this)">
+                    <input type="datetime-local" name="end-input" id="end-datetime" disabled onchange="validateEndDateTimeInput(this)">
                     <label for="end-datetime" style="color: red;" id="end-datetime-error-label" hidden>La fecha de término debe ser al menos 1 hora después del inicio</label>
                 </div>
                 <br>
@@ -262,14 +262,4 @@
         <button id="close-btn" type="button">Cerrar</button>
     </div>
     <div id="overlay" class="overlay"></div>
-    <!-- Hidden container for comuna data -->
-    <div id="comuna-data" style="display: none;">
-        {% for region in regiones %}
-        <div class="region-comunas" data-region-id="{{ region.id }}">
-            {% for comuna in region.comunas %}
-                <div class="comuna-item" data-comuna-id="{{ comuna.id }}" data-comuna-name="{{ comuna.nombre }}"></div>
-            {% endfor %}
-        </div>
-        {% endfor %}
-    </div>
 {% endblock %}

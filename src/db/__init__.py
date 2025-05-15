@@ -1,8 +1,10 @@
 """Database package for the application."""
 
-from .db import Session, Region, Comuna, Actividad, ContactarPor, ActividadTema, Foto
+from .connection import Session, db_init
+from .models import Region, Comuna, Actividad, ContactarPor, ActividadTema, Foto
 
 __all__ = [
+    "db_init",
     "Session",
     "Region",
     "Comuna",

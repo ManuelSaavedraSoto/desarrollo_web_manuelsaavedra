@@ -1,5 +1,4 @@
 // Activity List Management
-let isClientSide = window.history && window.history.pushState;
 let currentPage = 1;
 let totalPages = 1;
 

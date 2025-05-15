@@ -85,7 +85,7 @@
                     {% for foto in actividad.fotos %}
                     <img src="{{ url_for('static', filename=foto.ruta_archivo) }}" 
                          alt="Foto {{ loop.index }}" 
-                         onclick="showImage(this.src)">
+                         onclick="toggleWindow('image', this.src)">
                     {% endfor %}
                 </div>
             </div>
@@ -93,9 +93,9 @@
         </div>
     </div>
 
-    <div id="image-window" class="floating-image">
-        <button onclick="closeImage()" class="close-button" aria-label="Cerrar">&times;</button>
+    <div id="window-image" class="floating-image">
+        <button onclick="toggleWindow('image', '{{ def_src }}')" class="close-button" aria-label="Cerrar">&times;</button>
         <img id="enlarged-image" alt="Imagen Ampliada">
     </div>
-    <div id="overlay" class="overlay" onclick="closeImage()"></div>
+    <div id="overlay" class="overlay" onclick="toggleWindow('image', '{{ def_src }}')"></div>
 {% endblock %}
