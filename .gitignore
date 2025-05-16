@@ -1,6 +1,9 @@
 # Ignore virtual environment
 .venv/
 
+# Ignore VS Code settings
+.vscode/
+
 # Ignore assignment description files
 enunciado.pdf
 tarea2.png

@@ -100,11 +100,11 @@ def validate_themes(themes):
 
 def validate_contact_method(method, identifier=None):
     """Validates the contact method and its identifier if provided.
-    
+
     Args:
         method: The contact method to validate
         identifier: Optional identifier to validate for the given method
-        
+
     Returns:
         bool: True if both method and identifier (if provided) are valid, False otherwise
     """
@@ -118,22 +118,22 @@ def validate_contact_method(method, identifier=None):
         "otra",
     }:
         return False
-        
+
     # Validate identifier if provided
     if identifier is not None:
         if len(identifier) < 4 or len(identifier) > 50:
             return False
-            
+
     return True
 
 
 def get_contact_method_error(method=None, identifier=None):
     """Generates error message for contact method validation failures.
-    
+
     Args:
         method: The contact method being validated
         identifier: The identifier being validated
-        
+
     Returns:
         str: An appropriate error message based on the validation failure
     """
@@ -146,10 +146,10 @@ def get_contact_method_error(method=None, identifier=None):
         "otra",
     }:
         return f"Método de contacto '{method}' no es válido"
-        
+
     if identifier and (len(identifier) < 4 or len(identifier) > 50):
         return f"El identificador para {method} debe tener entre 4 y 50 caracteres"
-        
+
     return "Debe seleccionar al menos un método de contacto válido"
 
 
@@ -195,6 +195,7 @@ def validate_photo(photo):
     except (OSError, IOError):
         return False
 
+
 def validate_photos(inputs):
     """Validates the uploaded photos.
 
@@ -210,6 +211,7 @@ def validate_photos(inputs):
         if photo and not validate_photo(photo):
             return False
     return True
+
 
 def validate_inputs(inputs, session):
     """Validates the inputs extracted from the request."""
@@ -229,7 +231,8 @@ def validate_inputs(inputs, session):
             },
             {
                 "id": "comunaSelect",
-                "check": lambda: validate_selected_region(inputs) and not validate_comuna(
+                "check": lambda: validate_selected_region(inputs)
+                and not validate_comuna(
                     session, inputs["comuna_id"], inputs["region_id"]
                 ),
                 "message": "La comuna seleccionada no pertenece a la región indicada",
@@ -243,7 +246,8 @@ def validate_inputs(inputs, session):
             },
             {
                 "id": "emailInput",
-                "check": lambda: inputs["email"] and not validate_email(inputs["email"]),
+                "check": lambda: inputs["email"]
+                and not validate_email(inputs["email"]),
                 "message": "El formato del email es inválido",
             },
             {
@@ -253,7 +257,8 @@ def validate_inputs(inputs, session):
             },
             {
                 "id": "telInput",
-                "check": lambda: inputs["phone"] and not validate_phone(inputs["phone"]),
+                "check": lambda: inputs["phone"]
+                and not validate_phone(inputs["phone"]),
                 "message": "El formato del teléfono es inválido (debe ser +XXX.XXXXXXXX)",
             },
         ],
@@ -283,7 +288,8 @@ def validate_inputs(inputs, session):
             },
             {
                 "id": "themeInputs",
-                "check": lambda: inputs["themes"] and not validate_themes(inputs["themes"]),
+                "check": lambda: inputs["themes"]
+                and not validate_themes(inputs["themes"]),
                 "message": (
                     "Los temas seleccionados son inválidos o "
                     + "el tema personalizado debe tener entre 3 y 15 caracteres"
@@ -298,7 +304,8 @@ def validate_inputs(inputs, session):
             },
             {
                 "id": "contactMethods",
-                "check": lambda: inputs["contact_methods"] and any(
+                "check": lambda: inputs["contact_methods"]
+                and any(
                     not validate_contact_method(method, identifier)
                     for method, identifier in inputs["contact_methods"].items()
                 ),
