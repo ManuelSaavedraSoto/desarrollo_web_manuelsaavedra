@@ -216,60 +216,58 @@ def validate_photos(inputs):
 def validate_inputs(inputs, session):
     """Validates the inputs extracted from the request."""
     validation_rules = {
-        "name": [
-            {
-                "id": "nameInput",
-                "check": lambda: not inputs["name"],
-                "message": "El nombre es obligatorio",
-            },
-        ],
-        "location": [
-            {
-                "id": "regionSelect",
+        "location": {
+            "region": {
+                "id": "region-select",
                 "check": lambda: not validate_selected_region(inputs),
                 "message": "Debe seleccionar una región y comuna",
             },
-            {
-                "id": "comunaSelect",
+            "comuna": {
+                "id": "comuna-select",
                 "check": lambda: validate_selected_region(inputs)
                 and not validate_comuna(
                     session, inputs["comuna_id"], inputs["region_id"]
                 ),
                 "message": "La comuna seleccionada no pertenece a la región indicada",
             },
-        ],
-        "contact": [
-            {
-                "id": "emailInput",
+        },
+        "contact": {
+            "name": {
+                "id": "name-input",
+                "check": lambda: not inputs["name"],
+                "message": "El nombre es obligatorio",
+            },
+            "email": {
+                "id": "email-input",
                 "check": lambda: not inputs["email"],
                 "message": "El email es obligatorio",
             },
-            {
-                "id": "emailInput",
+            "email_format": {
+                "id": "email-input",
                 "check": lambda: inputs["email"]
                 and not validate_email(inputs["email"]),
                 "message": "El formato del email es inválido",
             },
-            {
-                "id": "telInput",
+            "phone": {
+                "id": "tel-input",
                 "check": lambda: not inputs["phone"],
                 "message": "El teléfono es obligatorio",
             },
-            {
-                "id": "telInput",
+            "phone_format": {
+                "id": "tel-input",
                 "check": lambda: inputs["phone"]
                 and not validate_phone(inputs["phone"]),
                 "message": "El formato del teléfono es inválido (debe ser +XXX.XXXXXXXX)",
             },
-        ],
-        "datetime": [
-            {
-                "id": "initInput",
+        },
+        "datetime": {
+            "init": {
+                "id": "init-datetime",
                 "check": lambda: not inputs["start_time"],
                 "message": "La fecha y hora de inicio son obligatorias",
             },
-            {
-                "id": "endInput",
+            "end": {
+                "id": "end-datetime",
                 "check": lambda: not validate_datetime(
                     inputs["start_time"], inputs.get("end_time")
                 ),
@@ -279,15 +277,15 @@ def validate_inputs(inputs, session):
                     else "La fecha/hora de inicio debe ser futura"
                 ),
             },
-        ],
-        "themes": [
-            {
-                "id": "themeInputs",
+        },
+        "themes": {
+            "no_selection": {
+                "id": "theme-inputs",
                 "check": lambda: not inputs["themes"],
                 "message": "Debe seleccionar al menos un tema",
             },
-            {
-                "id": "themeInputs",
+            "invalid": {
+                "id": "theme-inputs",
                 "check": lambda: inputs["themes"]
                 and not validate_themes(inputs["themes"]),
                 "message": (
@@ -295,55 +293,51 @@ def validate_inputs(inputs, session):
                     + "el tema personalizado debe tener entre 3 y 15 caracteres"
                 ),
             },
-        ],
-        "contact_methods": [
-            {
-                "id": "contactMethods",
+        },
+        "contact_methods": {
+            "no_selection": {
+                "id": "contact-methods",
                 "check": lambda: not inputs["contact_methods"],
                 "message": "Debe seleccionar al menos un método de contacto",
             },
-            {
-                "id": "contactMethods",
+            "invalid": {
+                "id": "contact-inputs",
                 "check": lambda: inputs["contact_methods"]
                 and any(
                     not validate_contact_method(method, identifier)
                     for method, identifier in inputs["contact_methods"].items()
                 ),
-                "message": lambda: next(
-                    get_contact_method_error(method, identifier)
-                    for method, identifier in inputs["contact_methods"].items()
-                    if not validate_contact_method(method, identifier)
+                "message": get_contact_method_error(
+                    inputs["contact_methods"], inputs.get("identifier")
                 ),
             },
-        ],
-        "photos": [
-            {
-                "id": "photoInput1",
+        },
+        "photos": {
+            "no_selection": {
+                "id": "foto-input-1",
                 "check": lambda: not inputs["photo_1"]
                 or not inputs["photo_1"].filename,
                 "message": "La primera foto es obligatoria",
             },
-            {
-                "id": "photoInputs",
+            "format": {
+                "id": "photo-inputs",
                 "check": lambda: not validate_photos(inputs),
                 "message": (
                     "Fotos deben ser un archivo "
                     + "de imagen válido (PNG/JPG) menor a 5MB"
                 ),
             },
-        ],
+        },
     }
 
     errors = {}
-    for category, rules in validation_rules.items():
-        category_errors = {}
-        for rule in rules:
+    for category, error_types in validation_rules.items():
+        for error_type, rule in error_types.items():
             if rule["check"]():
                 message = rule["message"]
                 if callable(message):
                     message = message()
-                category_errors[rule["id"]] = message
-        if category_errors:
-            errors[category] = category_errors
-
+                if category not in errors:
+                    errors[category] = {}
+                errors[category][error_type] = {"msg": message, "id": rule["id"]}
     return errors

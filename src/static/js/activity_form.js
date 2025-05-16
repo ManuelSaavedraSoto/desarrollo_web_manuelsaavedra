@@ -522,7 +522,6 @@ async function submitForm() {
             window.location.href = '/?success=true';
         } else {
             showToast('Por favor corrija los errores indicados', 'error');
-            console.log('Validation errors:', result);
             // Show specific error messages by category
             if (result) {
                 // Clear previous error states
@@ -530,54 +529,9 @@ async function submitForm() {
                 document.querySelectorAll('.error-label').forEach(el => el.remove());
 
                 // Handle each category of errors
-                if (result.name) {
-                    addErrorLabel('name-input', result.name.nameInput);
-                }
-
-                if (result.location) {
-                    if (result.location.regionSelect) {
-                        addErrorLabel('region-select', result.location.regionSelect);
-                        addErrorClass('comuna-select');
-                    }
-                    if (result.location.comunaSelect) {
-                        addErrorLabel('comuna-select', result.location.comunaSelect);
-                    }
-                }
-                
-                if (result.contact) {
-                    if (result.contact.emailInput) {
-                        addErrorLabel('email-input', result.contact.emailInput);
-                    }
-                    if (result.contact.telInput) {
-                        addErrorLabel('tel-input', result.contact.telInput);
-                    }
-                }
-
-                if (result.datetime) {
-                    if (result.datetime.initInput) {
-                        addErrorLabel('init-datetime', result.datetime.initInput);
-                    }
-                    else if (result.datetime.endInput) {
-                        addErrorLabel('end-datetime', result.datetime.endInput);
-                    }
-                }
-
-                if (result.themes) {
-                    addErrorClass('theme-inputs');
-                    addErrorLabel('theme-inputs', result.themes.themeInputs);
-                }
-
-                if (result.contact_methods) {
-                    addErrorClass('contact-methods');
-                    addErrorLabel('contact-methods', result.contact_methods.contactMethods);
-                }
-
-                if (result.photos) {
-                    if (result.photos.photoInput1) {
-                        addErrorLabel('foto-input-1', result.photos.photoInput1);
-                    }
-                    if (result.photos.photoInputs) {
-                        addErrorLabel('photo-inputs', result.photos.photoInputs);
+                for (const category in result) {
+                    for (const error_type in result[category]) {
+                        addErrorLabel(result[category][error_type].id, result[category][error_type].msg);
                     }
                 }
             }

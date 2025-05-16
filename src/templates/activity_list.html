@@ -8,34 +8,33 @@
 {% endblock %}
 
 {% block content %}
-        <h1>Lista de Actividades</h1>
-        <div class="nav-buttons">
-            <button onclick="window.location.href='{{ url_for('index') }}'">Volver a Inicio</button>
-            <button onclick="window.location.href='{{ url_for('activity_form') }}'">Informar Actividad</button>
-        </div>
+    <h1>Lista de Actividades</h1>
+    <div class="nav-buttons">
+        <button onclick="window.location.href='{{ url_for('index') }}'">Volver a Inicio</button>
+        <button onclick="window.location.href='{{ url_for('activity_form') }}'">Informar Actividad</button>
+    </div>
 
-        <div>
-            <table class="full-width-table">
-                <thead>
-                    <tr>
-                        <th>Inicio</th>
-                        <th>Término</th>
-                        <th>Comuna</th>
-                        <th>Sector</th>
-                        <th>Tema</th>
-                        <th>Nombre</th>
-                        <th>Fotos</th>
-                    </tr>
-                </thead>
-                <tbody id="activities-table-body">
-                    <!-- Activities will be loaded here -->
-                </tbody>
-            </table>
-
-            <!-- Pagination -->
-            <div id="pagination" class="pagination">
-                <!-- Pagination will be loaded here -->
-            </div>
+    <div>
+        <table class="full-width-table">
+            <thead>
+                <tr>
+                    <th>Inicio</th>
+                    <th>Término</th>
+                    <th>Comuna</th>
+                    <th>Sector</th>
+                    <th>Tema</th>
+                    <th>Nombre</th>
+                    <th>Fotos</th>
+                </tr>
+            </thead>
+            <tbody id="activities-table-body">
+                <!-- Activities will be loaded here -->
+            </tbody>
+        </table>
+        
+        <!-- Pagination -->
+        <div id="pagination" class="pagination">
+            <!-- Pagination will be loaded here -->
         </div>
     </div>
 {% endblock %}

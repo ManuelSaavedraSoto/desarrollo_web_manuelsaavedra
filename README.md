@@ -55,6 +55,8 @@
 Utiliće PyLint junto a Python Black para forzar y mantener un estilo de código estándar y legible para comodidad
 personal y al momento de revisar la tarea.
 
+Se verifico el archivo con Jigsaw de W3.
+
 ### Diseño de Interfaz (UI/UX)
 
 Seguí el diseño establecido anteriormente pero agregué más definiciones en el archivo `.css` como se sugirió 
@@ -76,9 +78,20 @@ más como una extensión de la ruta de POST que derechamente una función auxili
 Por otra parte, implemente rutas "API" para poder tomar ventaja de funciones asincrónicas en el formulario y
 listado de actividades, evitando redireccionar de forma innecesaria y mejorar el dinamismo de la página.
 
+### Verificación Server-side
+
+Se realiza de forma asincrónica, el cliente envía la data y espera la respuesta del server que 
+se entrega en formato `.json`.
+
+En el módulo `utils.valiadtion` se definen las validaciones y un diccionario que contiene las reglas de validación 
+a ejecutar. De esta forma se minimiza la cantidad de variables auxiliares para contener los booleanos y se facilita 
+exportar los resultados como un `.json`.
+
 ### Templates
 
 Principalmente fueron refactorizados para utilizar templating de Jinja2 y reducir el código duplicado.
+
+Se verifico que los templates una vez traducidos por Jinja2 cumplan con el verificador Nu Html de W3. 
 
 ### Scripting
 
