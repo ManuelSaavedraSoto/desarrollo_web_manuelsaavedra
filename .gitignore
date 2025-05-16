@@ -8,6 +8,6 @@ tarea2.png
 # Ignore Python cache files
 **/__pycache__/
 
-# Ignore upload files except for cat_*
+# Ignore upload files except for cat_* files used for testing
 src/static/uploads
 !src/static/uploads/cat_*

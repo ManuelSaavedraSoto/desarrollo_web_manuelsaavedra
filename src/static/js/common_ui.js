@@ -54,3 +54,31 @@ function showToast(message, type = 'success') {
         }
     }, 3000);
 }
+
+function addErrorLabel(inputId, message)  {
+    const input = document.getElementById(inputId);
+    const errorLabel = document.createElement('span');
+    errorLabel.className = 'error-label';
+    errorLabel.textContent = message;
+    input.parentNode.insertBefore(errorLabel, input.nextSibling);
+    input.classList.add('error');
+};
+
+function addErrorClass(inputId) {
+    const input = document.getElementById(inputId);
+    input.classList.add('error');
+}
+
+function removeErrorLabel(inputId) {
+    const input = document.getElementById(inputId);
+    const errorLabel = input.parentNode.querySelector('.error-label');
+    if (errorLabel) {
+        errorLabel.remove();
+    }
+    input.classList.remove('error');
+}
+
+function removeErrorClass(inputId) {
+    const input = document.getElementById(inputId);
+    input.classList.remove('error');
+}

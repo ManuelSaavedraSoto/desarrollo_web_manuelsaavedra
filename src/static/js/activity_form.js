@@ -15,10 +15,14 @@ async function fetchRegions() {
     }
 }
 
-function handleComuna(event) {
+function handleRegionSelection(event) {
     const comunaSelect = document.getElementById('comuna-select');
     const selectedRegionId = event.target.value;
     
+    if (!(selectedRegionId === undefined)) {
+        removeErrorLabel('region-select');
+    }
+
     // Reset and enable comuna select
     comunaSelect.disabled = false;
     comunaSelect.innerHTML = '<option value="" selected disabled>Por favor elija una comuna.</option>';
@@ -38,17 +42,31 @@ function handleComuna(event) {
     }
 }
 
-function handleThemeSelection(checkbox) {
-    const otherThemeInputDiv = document.getElementById('other-theme-input');
-    const otherThemeTextInput = document.getElementById('other-theme-text-input');
+function handleComunaSelection(event) {
+    const selectedComunaId = event.target.value;
+    
+    if (!(selectedComunaId === undefined)) {
+        removeErrorLabel('comuna-select');
+    }
+}
 
+function handleThemeSelection(checkbox) {
     if (checkbox.checked) {
-        otherThemeInputDiv.hidden = false;
-        otherThemeTextInput.required = true;
-    } else {
-        otherThemeInputDiv.hidden = true;
-        otherThemeTextInput.required = false;
-        otherThemeTextInput.value = "";
+        removeErrorLabel('theme-inputs');
+    }
+
+    if (checkbox.id === 'other-theme') {
+        const otherThemeInputDiv = document.getElementById('other-theme-input');
+        const otherThemeTextInput = document.getElementById('other-theme-text-input');
+
+        if (checkbox.checked) {
+            otherThemeInputDiv.hidden = false;
+            otherThemeTextInput.required = true;
+        } else {
+            otherThemeInputDiv.hidden = true;
+            otherThemeTextInput.required = false;
+            otherThemeTextInput.value = "";
+        }
     }
 }
 
@@ -62,6 +80,10 @@ function handleContactSelection(selectedOption) {
     selectedOptionDiv.hidden = !selectedOption.checked;
     selectedOptionInput.required = selectedOption.checked;
     if (!selectedOption.checked) selectedOptionInput.value = "";
+
+    if (selectedOptions.length > 0) {
+        removeErrorLabel('contact-methods');
+    }
 
     options.forEach(option => {
         option.disabled = false;
@@ -104,6 +126,7 @@ function handleEndDateTimeInput(startInput) {
     endInput.disabled = false;
 
     errorLabel.hidden = true;
+    removeErrorLabel('end-datetime');
 }
 
 function handleOptionalPhotoInputs(enable) {
@@ -122,10 +145,10 @@ function validateName() {
     let isValid = true;
 
     if (!nameInput.value || nameInput.value.length > 200) {
-        nameInput.classList.add('error');
+        addErrorLabel('name-input', 'Nombre inválido. Máximo 200 caracteres');
         isValid = false;
     } else {
-        nameInput.classList.remove('error');
+        removeErrorLabel('name-input');
     }
 
     return isValid;
@@ -139,7 +162,7 @@ function validateRegionComuna() {
     if (!(regionData === undefined)) {
         const selectedComuna = regionData.comunas.find(comuna => comuna.id === parseInt(comunaSelect.value));
         if (!(selectedComuna === undefined)) {
-            regionSelect.classList.remove('error');
+            removeErrorLabel('region-select');
             comunaSelect.classList.remove('error');
             return true;
         } else {
@@ -162,7 +185,7 @@ function validateEmail() {
         emailInput.classList.add('error');
         isValid = false;
     } else {
-        emailInput.classList.remove('error');
+        removeErrorLabel('error');
     }
 
     return isValid;
@@ -174,10 +197,10 @@ function validateTel() {
     let isValid = true;
 
     if (!tel_pattern.test(telInput.value)) {
-        telInput.classList.add('error');
+        addErrorLabel('tel-input', 'Teléfono inválido. Formato esperado: +56.12345678');
         isValid = false;
     } else {
-        telInput.classList.remove('error');
+        removeErrorLabel('tel-input');
     }
 
     return isValid;
@@ -206,6 +229,9 @@ function validateFoto(input) {
             handleOptionalPhotoInputs(true);
         }
         
+        removeErrorLabel('photo-inputs');
+        removeErrorLabel(fileId);
+
         return true;
     }
     
@@ -219,16 +245,12 @@ function validateFoto(input) {
 
 function validatePhotos() {
     const firstPhoto = document.getElementById('foto-input-1');
-    const firstPhotoError = document.getElementById('foto-type-error-label-1');
     
     // Reset error states
-    firstPhotoError.hidden = true;
-    firstPhoto.classList.remove('error');
+    removeErrorLabel('foto-input-1');
     
     if (!firstPhoto.files.length) {
-        firstPhoto.classList.add('error');
-        firstPhotoError.textContent = 'La primera foto es obligatoria';
-        firstPhotoError.hidden = false;
+        addErrorLabel('foto-input-1', 'Primera foto es obligatoria');
         return false;
     }
     
@@ -340,7 +362,7 @@ function validateContacts() {
 
     for (let method of selectedMethodsArr) {
         const input = document.getElementById(`contact-${method.value}-input`);
-        if (!input.value || input.value.length < 4) {
+        if (!input.value || input.value.length < 4 || input.value.length > 50) {
             input.classList.add('error');
             return false;
         }
@@ -406,8 +428,14 @@ function loadForm() {
     // Initialize photo inputs state
     handleOptionalPhotoInputs(false);
     
+    // Initialize name input
+    document.getElementById('name-input').addEventListener('change', validateName);
+
     // Initialize region selector
-    document.getElementById('region-select').addEventListener("change", handleComuna);
+    document.getElementById('region-select').addEventListener("change", handleRegionSelection);
+
+    // Initialize comuna selector
+    document.getElementById('comuna-select').addEventListener("change", handleComunaSelection);
 
     // Initialize form submission handlers
     document.getElementById('verify-btn').addEventListener('click', () => {
@@ -428,7 +456,7 @@ function loadForm() {
     });
     
     document.getElementById('submit-btn').addEventListener('click', async () => {
-        if (!isSubmitting) {
+        if (!isSubmitting && validateForm()) {
             await submitForm();
             toggleWindow('confirmation');
         }
@@ -446,6 +474,13 @@ async function submitForm() {
     if (isSubmitting) {
         return;
     }
+
+    // Validate form before submission
+    /* Commented for testing purposes
+    if (!validateForm()) {
+        return;
+    }
+    */
     
     setSubmitting(true);
     const form = document.getElementById('actividad-form');
@@ -476,7 +511,8 @@ async function submitForm() {
     try {
         const response = await fetch(window.location.href, {
             method: 'POST',
-            body: formData
+            body: formData,
+            enctype: 'multipart/form-data',
         });
 
         const result = await response.json();
@@ -485,12 +521,67 @@ async function submitForm() {
             // Redirect immediately on success, toast will be shown on index page
             window.location.href = '/?success=true';
         } else {
-            showToast(result.error || 'Error al procesar el formulario', 'error');
-            // Keep form visible and scroll to any validation messages
-            const validationMessages = document.querySelector('.validation-message');
-            if (validationMessages) {
-                validationMessages.scrollIntoView({ behavior: 'smooth' });
+            showToast('Por favor corrija los errores indicados', 'error');
+            console.log('Validation errors:', result);
+            // Show specific error messages by category
+            if (result) {
+                // Clear previous error states
+                document.querySelectorAll('.error').forEach(el => el.classList.contains('toast') ? {} : el.classList.remove('error'));
+                document.querySelectorAll('.error-label').forEach(el => el.remove());
+
+                // Handle each category of errors
+                if (result.name) {
+                    addErrorLabel('name-input', result.name.nameInput);
+                }
+
+                if (result.location) {
+                    if (result.location.regionSelect) {
+                        addErrorLabel('region-select', result.location.regionSelect);
+                        addErrorClass('comuna-select');
+                    }
+                    if (result.location.comunaSelect) {
+                        addErrorLabel('comuna-select', result.location.comunaSelect);
+                    }
+                }
+                
+                if (result.contact) {
+                    if (result.contact.emailInput) {
+                        addErrorLabel('email-input', result.contact.emailInput);
+                    }
+                    if (result.contact.telInput) {
+                        addErrorLabel('tel-input', result.contact.telInput);
+                    }
+                }
+
+                if (result.datetime) {
+                    if (result.datetime.initInput) {
+                        addErrorLabel('init-datetime', result.datetime.initInput);
+                    }
+                    else if (result.datetime.endInput) {
+                        addErrorLabel('end-datetime', result.datetime.endInput);
+                    }
+                }
+
+                if (result.themes) {
+                    addErrorClass('theme-inputs');
+                    addErrorLabel('theme-inputs', result.themes.themeInputs);
+                }
+
+                if (result.contact_methods) {
+                    addErrorClass('contact-methods');
+                    addErrorLabel('contact-methods', result.contact_methods.contactMethods);
+                }
+
+                if (result.photos) {
+                    if (result.photos.photoInput1) {
+                        addErrorLabel('foto-input-1', result.photos.photoInput1);
+                    }
+                    if (result.photos.photoInputs) {
+                        addErrorLabel('photo-inputs', result.photos.photoInputs);
+                    }
+                }
             }
+            // Reset form state
             setSubmitting(false);
         }
     } catch (error) {

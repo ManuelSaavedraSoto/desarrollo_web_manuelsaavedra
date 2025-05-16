@@ -60,13 +60,18 @@ def get_inputs(req):
         else:
             inputs["themes"].append(value)
 
-    inputs["contact_methods"] = [
-        req.form[f"contact-method-{i}"]
-        for i in range(len(req.form))
-        if f"contact-method-{i}" in req.form
-    ]
+    # Build contact methods dictionary
+    inputs["contact_methods"] = {}
+    i = 0
+    while f"contact-method-{i}" in req.form:
+        method = req.form[f"contact-method-{i}"]
+        identifier = req.form[f"contact-identifier-{i}"]
+        inputs["contact_methods"][method] = identifier
+        i += 1
 
     inputs["photo_1"] = req.files.get("foto-input-1")
+
+    inputs["opt-photos"] = [req.files.get(f"foto-input-{i}") for i in range(2, 6)]
 
     return inputs
 
@@ -104,25 +109,42 @@ def create_activity(inputs):
     return activity
 
 
-def process_photos(session, req, actividad_id, upload_folder):
+def process_photos(session, inputs, actividad_id, upload_folder):
     """Process and save activity photos.
 
     Args:
         session: Database session
-        req: Flask request object
+        inputs: Dictionary containing validated inputs including photos
         actividad_id: ID of the activity
         upload_folder: Path to upload directory
 
     Raises:
         ValueError: If there's an error saving the photo files
     """
-    for i in range(1, 6):
-        photo_key = f"foto-input-{i}"
-        if photo_key not in req.files:
-            continue
+    # Process main photo (mandatory)
+    photo = inputs["photo_1"]
+    if photo and validate_photo(photo):
+        ext = os.path.splitext(secure_filename(photo.filename))[1].lower()
+        new_filename = f"{actividad_id}_1{ext}"
+        photo_path = os.path.join("uploads", new_filename)
+        full_path = os.path.join(upload_folder, new_filename)
+        try:
+            photo.save(full_path)
+            foto = Foto(
+                ruta_archivo=photo_path,
+                nombre_archivo=new_filename,
+                actividad_id=actividad_id,
+            )
+            session.add(foto)
+        except IOError as io_err:
+            raise ValueError(
+                f"Error al guardar archivo de foto: {str(io_err)}"
+            ) from io_err
 
-        photo = req.files[photo_key]
-        if not validate_photo(photo):
+    # Process optional photos
+    i = 2
+    for photo in inputs["opt-photos"]:
+        if not photo or not validate_photo(photo):
             continue
 
         ext = os.path.splitext(secure_filename(photo.filename))[1].lower()
@@ -142,6 +164,8 @@ def process_photos(session, req, actividad_id, upload_folder):
             raise ValueError(
                 f"Error al guardar archivo de foto: {str(io_err)}"
             ) from io_err
+        finally:
+            i += 1
 
 
 def process_themes(session, themes, actividad_id):
@@ -161,16 +185,12 @@ def process_themes(session, themes, actividad_id):
         session.add(tema)
 
 
-def process_contact_methods(session, req, actividad_id):
+def process_contact_methods(session, inputs, actividad_id):
     """Process and save activity contact methods."""
-    i = 0
-    while f"contact-method-{i}" in req.form:
-        method = req.form[f"contact-method-{i}"]
-        identifier = req.form[f"contact-identifier-{i}"]
+    for method, identifier in inputs["contact_methods"].items():
         contacto = ContactarPor(
             nombre=get_normalized_contact_method(method),
             identificador=identifier,
             actividad_id=actividad_id,
         )
         session.add(contacto)
-        i += 1

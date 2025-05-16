@@ -211,7 +211,7 @@ def handle_activity_post(session, req):
         errors = validate_inputs(inputs, session)
 
         if errors:
-            return jsonify({"error": " | ".join(errors)}), 400
+            return jsonify(errors), 400
 
         actividad = create_activity(inputs)
         session.add(actividad)

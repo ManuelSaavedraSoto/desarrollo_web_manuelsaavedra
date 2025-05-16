@@ -98,16 +98,59 @@ def validate_themes(themes):
     return all(3 <= len(theme) <= 15 for theme in custom_themes)
 
 
-def validate_contact_method(method):
-    """Validates the contact method selected by the user."""
-    return method.lower() in {
+def validate_contact_method(method, identifier=None):
+    """Validates the contact method and its identifier if provided.
+    
+    Args:
+        method: The contact method to validate
+        identifier: Optional identifier to validate for the given method
+        
+    Returns:
+        bool: True if both method and identifier (if provided) are valid, False otherwise
+    """
+    # Validate method name
+    if not method.lower() in {
         "whatsapp",
         "telegram",
         "x",
         "instagram",
         "tik-tok",
         "otra",
-    }
+    }:
+        return False
+        
+    # Validate identifier if provided
+    if identifier is not None:
+        if len(identifier) < 4 or len(identifier) > 50:
+            return False
+            
+    return True
+
+
+def get_contact_method_error(method=None, identifier=None):
+    """Generates error message for contact method validation failures.
+    
+    Args:
+        method: The contact method being validated
+        identifier: The identifier being validated
+        
+    Returns:
+        str: An appropriate error message based on the validation failure
+    """
+    if method and not method.lower() in {
+        "whatsapp",
+        "telegram",
+        "x",
+        "instagram",
+        "tik-tok",
+        "otra",
+    }:
+        return f"Método de contacto '{method}' no es válido"
+        
+    if identifier and (len(identifier) < 4 or len(identifier) > 50):
+        return f"El identificador para {method} debe tener entre 4 y 50 caracteres"
+        
+    return "Debe seleccionar al menos un método de contacto válido"
 
 
 def validate_comuna(session, comuna_id, region_id):
@@ -122,6 +165,11 @@ def validate_comuna(session, comuna_id, region_id):
         return bool(result)
     except (ValueError, TypeError):
         return False
+
+
+def validate_selected_region(inputs):
+    """Validates if there is a selected region and comuna."""
+    return bool(inputs["region_id"] and inputs["comuna_id"])
 
 
 def validate_photo(photo):
@@ -147,56 +195,148 @@ def validate_photo(photo):
     except (OSError, IOError):
         return False
 
+def validate_photos(inputs):
+    """Validates the uploaded photos.
+
+    Args:
+        inputs: The dictionary containing the uploaded files
+
+    Returns:
+        bool: True if all photos are valid, False otherwise
+    """
+    if not validate_photo(inputs["photo_1"]):
+        return False
+    for photo in inputs["opt-photos"]:
+        if photo and not validate_photo(photo):
+            return False
+    return True
 
 def validate_inputs(inputs, session):
     """Validates the inputs extracted from the request."""
-    validation_rules = [
-        (
-            not inputs["comuna_id"] or not inputs["region_id"],
-            "Debe seleccionar una región y comuna",
-        ),
-        (
-            not validate_comuna(session, inputs["comuna_id"], inputs["region_id"]),
-            "La comuna seleccionada no pertenece a la región indicada",
-        ),
-        (not inputs["email"], "El email es obligatorio"),
-        (not validate_email(inputs["email"]), "El formato del email es inválido"),
-        (not inputs["phone"], "El teléfono es obligatorio"),
-        (
-            not validate_phone(inputs["phone"]),
-            "El formato del teléfono es inválido (debe ser +XXX.XXXXXXXX)",
-        ),
-        (not inputs["start_time"], "La fecha y hora de inicio son obligatorias"),
-        (
-            not validate_datetime(inputs["start_time"], inputs.get("end_time")),
-            (
-                "La fecha/hora de término debe ser posterior a la de inicio"
-                if inputs.get("end_time")
-                else "La fecha/hora de inicio debe ser futura"
-            ),
-        ),
-        (not inputs["themes"], "Debe seleccionar al menos un tema"),
-        (
-            not validate_themes(inputs["themes"]),
-            "Los temas seleccionados son inválidos o"
-            + " el tema personalizado debe tener entre 3 y 15 caracteres",
-        ),
-        (
-            not inputs["contact_methods"],
-            "Debe seleccionar al menos un método de contacto",
-        ),
-        (
-            any(not validate_contact_method(m) for m in inputs["contact_methods"]),
-            "Método de contacto inválido",
-        ),
-        (
-            not inputs["photo_1"] or not inputs["photo_1"].filename,
-            "La primera foto es obligatoria",
-        ),
-        (
-            not validate_photo(inputs["photo_1"]),
-            "La primera foto debe ser un archivo de imagen válido (PNG/JPG) menor a 5MB",
-        ),
-    ]
+    validation_rules = {
+        "name": [
+            {
+                "id": "nameInput",
+                "check": lambda: not inputs["name"],
+                "message": "El nombre es obligatorio",
+            },
+        ],
+        "location": [
+            {
+                "id": "regionSelect",
+                "check": lambda: not validate_selected_region(inputs),
+                "message": "Debe seleccionar una región y comuna",
+            },
+            {
+                "id": "comunaSelect",
+                "check": lambda: validate_selected_region(inputs) and not validate_comuna(
+                    session, inputs["comuna_id"], inputs["region_id"]
+                ),
+                "message": "La comuna seleccionada no pertenece a la región indicada",
+            },
+        ],
+        "contact": [
+            {
+                "id": "emailInput",
+                "check": lambda: not inputs["email"],
+                "message": "El email es obligatorio",
+            },
+            {
+                "id": "emailInput",
+                "check": lambda: inputs["email"] and not validate_email(inputs["email"]),
+                "message": "El formato del email es inválido",
+            },
+            {
+                "id": "telInput",
+                "check": lambda: not inputs["phone"],
+                "message": "El teléfono es obligatorio",
+            },
+            {
+                "id": "telInput",
+                "check": lambda: inputs["phone"] and not validate_phone(inputs["phone"]),
+                "message": "El formato del teléfono es inválido (debe ser +XXX.XXXXXXXX)",
+            },
+        ],
+        "datetime": [
+            {
+                "id": "initInput",
+                "check": lambda: not inputs["start_time"],
+                "message": "La fecha y hora de inicio son obligatorias",
+            },
+            {
+                "id": "endInput",
+                "check": lambda: not validate_datetime(
+                    inputs["start_time"], inputs.get("end_time")
+                ),
+                "message": lambda: (
+                    "La fecha/hora de término debe ser posterior a la de inicio"
+                    if inputs.get("end_time")
+                    else "La fecha/hora de inicio debe ser futura"
+                ),
+            },
+        ],
+        "themes": [
+            {
+                "id": "themeInputs",
+                "check": lambda: not inputs["themes"],
+                "message": "Debe seleccionar al menos un tema",
+            },
+            {
+                "id": "themeInputs",
+                "check": lambda: inputs["themes"] and not validate_themes(inputs["themes"]),
+                "message": (
+                    "Los temas seleccionados son inválidos o "
+                    + "el tema personalizado debe tener entre 3 y 15 caracteres"
+                ),
+            },
+        ],
+        "contact_methods": [
+            {
+                "id": "contactMethods",
+                "check": lambda: not inputs["contact_methods"],
+                "message": "Debe seleccionar al menos un método de contacto",
+            },
+            {
+                "id": "contactMethods",
+                "check": lambda: inputs["contact_methods"] and any(
+                    not validate_contact_method(method, identifier)
+                    for method, identifier in inputs["contact_methods"].items()
+                ),
+                "message": lambda: next(
+                    get_contact_method_error(method, identifier)
+                    for method, identifier in inputs["contact_methods"].items()
+                    if not validate_contact_method(method, identifier)
+                ),
+            },
+        ],
+        "photos": [
+            {
+                "id": "photoInput1",
+                "check": lambda: not inputs["photo_1"]
+                or not inputs["photo_1"].filename,
+                "message": "La primera foto es obligatoria",
+            },
+            {
+                "id": "photoInputs",
+                "check": lambda: not validate_photos(inputs),
+                "message": (
+                    "Fotos deben ser un archivo "
+                    + "de imagen válido (PNG/JPG) menor a 5MB"
+                ),
+            },
+        ],
+    }
 
-    return [error for condition, error in validation_rules if condition]
+    errors = {}
+    for category, rules in validation_rules.items():
+        category_errors = {}
+        for rule in rules:
+            if rule["check"]():
+                message = rule["message"]
+                if callable(message):
+                    message = message()
+                category_errors[rule["id"]] = message
+        if category_errors:
+            errors[category] = category_errors
+
+    return errors

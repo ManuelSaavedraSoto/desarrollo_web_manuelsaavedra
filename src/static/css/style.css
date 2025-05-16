@@ -154,6 +154,15 @@ button:disabled {
     color: var(--error-color);
 }
 
+.error-label {
+    display: block;
+    color: var(--error-color);
+    font-size: 0.8em;
+    margin-top: -8px;
+    margin-bottom: 10px;
+    padding-left: 4px;
+}
+
 /* Image Gallery */
 .image-gallery {
     display: grid;

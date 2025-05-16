@@ -14,7 +14,7 @@
         <p>Lorem ipsum Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque pellentesque nibh sit amet nisi eleifend, sed bibendum sem dapibus. Nam suscipit quis arcu a imperdiet.</p>
     </div>
     <div>
-        <form id="actividad-form" onsubmit="return false;" enctype="multipart/form-data">
+        <form id="actividad-form" onsubmit="return false;" method="POST" enctype="multipart/form-data">
             <div>
                 <h3>¿Dónde?</h3>
                 <div>
@@ -167,39 +167,39 @@
                     <label>Tema: </label>
                     <div id="theme-inputs" class="checkbox-group">
                         <div class="checkbox-item">
-                            <input type="checkbox" id="theme-musica" value="Música">
+                            <input type="checkbox" id="theme-musica" value="Música" onchange="handleThemeSelection(this)">
                             <label for="theme-musica">Música</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="theme-deporte" value="Deporte">
+                            <input type="checkbox" id="theme-deporte" value="Deporte" onchange="handleThemeSelection(this)">
                             <label for="theme-deporte">Deporte</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="theme-ciencias" value="Ciencias">
+                            <input type="checkbox" id="theme-ciencias" value="Ciencias" onchange="handleThemeSelection(this)">
                             <label for="theme-ciencias">Ciencias</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="theme-religion" value="Religión">
+                            <input type="checkbox" id="theme-religion" value="Religión" onchange="handleThemeSelection(this)">
                             <label for="theme-religion">Religión</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="theme-politica" value="Política">
+                            <input type="checkbox" id="theme-politica" value="Política" onchange="handleThemeSelection(this)">
                             <label for="theme-politica">Política</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="theme-tecnologia" value="Tecnología">
+                            <input type="checkbox" id="theme-tecnologia" value="Tecnología" onchange="handleThemeSelection(this)">
                             <label for="theme-tecnologia">Tecnología</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="theme-juegos" value="Juegos">
+                            <input type="checkbox" id="theme-juegos" value="Juegos" onchange="handleThemeSelection(this)">
                             <label for="theme-juegos">Juegos</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="theme-baile" value="Baile">
+                            <input type="checkbox" id="theme-baile" value="Baile" onchange="handleThemeSelection(this)">
                             <label for="theme-baile">Baile</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="theme-comida" value="Comida">
+                            <input type="checkbox" id="theme-comida" value="Comida" onchange="handleThemeSelection(this)">
                             <label for="theme-comida">Comida</label>
                         </div>
                         <div class="checkbox-item">
