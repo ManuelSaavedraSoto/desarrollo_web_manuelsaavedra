@@ -4,6 +4,7 @@
 
 {% block head %}
     {{ super() }}
+    <script>const apiURL = "{{ url_for('get_paginated_activities') }}";</script>
     <script src="{{ url_for('static', filename='js/activity_list.js') }}"></script>
 {% endblock %}
 

@@ -1,20 +1,6 @@
 // Form Input Handling Functions
 var regionJSON = null;
 
-async function fetchRegions() {
-    try {
-        const response = await fetch('/api/regiones');
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        regionJSON = data;
-
-    }  catch (error) {
-        console.error('Error:', error);
-    }
-}
-
 function handleRegionSelection(event) {
     const comunaSelect = document.getElementById('comuna-select');
     const selectedRegionId = event.target.value;

@@ -1,7 +1,6 @@
 """Aplicación Flask para tarea 2 del curso CC5002"""
 
 import os
-import json
 from flask import Flask, request, jsonify, render_template, abort, url_for
 from db import db_init, Session, Region, Actividad
 from utils import (
@@ -92,6 +91,33 @@ def activity_detail(activity_id):
 @app.route("/estadisticas", methods=["GET"])
 def activity_stats():
     """Route for the activity statistics page."""
+    return render_template("activity_stats.html")
+
+
+@app.route("/api/regiones", methods=["GET"])
+def get_regiones():
+    """API endpoint for fetching regiones and their comunas"""
+    session = Session()
+    try:
+        regiones = session.query(Region).all()
+        regiones_data = [
+            {
+                "id": region.id,
+                "nombre": region.nombre,
+                "comunas": [
+                    {"id": comuna.id, "nombre": comuna.nombre}
+                    for comuna in region.comunas
+                ],
+            }
+            for region in regiones
+        ]
+        return jsonify(regiones_data)
+    finally:
+        session.close()
+
+@app.route("/api/actividades")
+def get_activities():
+    """API endpoint for activities"""
     session = Session()
     try:
         # Get all activities
@@ -126,39 +152,16 @@ def activity_stats():
         # Convert data to JSON for JavaScript
         chart_data = {"activities": activities_data, "theme_counts": theme_counts}
 
-        return render_template("activity_stats.html", chart_data=json.dumps(chart_data))
+        return jsonify(chart_data)
     finally:
         session.close()
 
-
-@app.route("/api/regiones", methods=["GET"])
-def get_regiones():
-    """API endpoint for fetching regiones and their comunas"""
-    session = Session()
-    try:
-        regiones = session.query(Region).all()
-        regiones_data = [
-            {
-                "id": region.id,
-                "nombre": region.nombre,
-                "comunas": [
-                    {"id": comuna.id, "nombre": comuna.nombre}
-                    for comuna in region.comunas
-                ],
-            }
-            for region in regiones
-        ]
-        return jsonify(regiones_data)
-    finally:
-        session.close()
-
-
-@app.route("/api/actividades", methods=["GET"])
+@app.route("/api/actividades/paginated", methods=["POST"])
 def get_paginated_activities():
     """API endpoint for paginated activities."""
     session = Session()
     try:
-        page = request.args.get("page", 1, type=int)
+        page = request.form.get("page", 1, type=int)
         per_page = 5
 
         total_activities = session.query(Actividad).count()
@@ -173,36 +176,15 @@ def get_paginated_activities():
             .all()
         )
 
-        # Convert activities to JSON-serializable format
-        activities_data = []
-        for activity in activities:
-            activities_data.append(
-                {
-                    "id": activity.id,
-                    "nombre": activity.nombre,
-                    "inicio": activity.dia_hora_inicio.strftime("%Y-%m-%d %H:%M"),
-                    "termino": (
-                        activity.dia_hora_termino.strftime("%Y-%m-%d %H:%M")
-                        if activity.dia_hora_termino
-                        else None
-                    ),
-                    "comuna": activity.comuna.nombre,
-                    "sector": activity.sector,
-                    "temas": [
-                        t.tema.capitalize() if t.tema != "otro" else t.glosa_otro
-                        for t in activity.temas
-                    ],
-                    "num_fotos": len(activity.fotos),
-                }
-            )
+        html = render_template("activity_page.html", actividades=activities)
 
-        return jsonify(
-            {
-                "activities": activities_data,
-                "current_page": page,
-                "total_pages": total_pages,
-            }
-        )
+        data = {
+            "currentPage": page,
+            "totalPages": total_pages,
+            "html": html, 
+        }
+
+        return data
     finally:
         session.close()
 

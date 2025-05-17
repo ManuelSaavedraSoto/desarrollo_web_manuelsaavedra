@@ -1,0 +1,20 @@
+{% for actividad in actividades %}
+<tr onclick="window.location.href='{{ url_for('activity_detail', activity_id=actividad.id) }}'" class="btn-row">
+    <td>{{ actividad.dia_hora_inicio.strftime('%d-%m-%Y %H:%M') }}</td>
+    <td>{{ actividad.dia_hora_termino.strftime('%d-%m-%Y %H:%M') if actividad.dia_hora_termino else 'No especificado' }}</td>
+    <td>{{ actividad.comuna.nombre }}</td>
+    <td>{{ actividad.sector if actividad.sector else 'No especificado' }}</td>
+    <td>
+        {% for tema in actividad.temas %}
+            {% if tema.tema == 'otro' %}
+                {{ tema.glosa_otro }}
+            {% else %}
+                {{ tema.tema|capitalize }}
+            {% endif %}
+            {% if not loop.last %}, {% endif %}
+        {% endfor %}
+    </td>
+    <td>{{ actividad.nombre }}</td>
+    <td>{{ actividad.fotos.length }}</td>
+</tr>
+{% endfor %}

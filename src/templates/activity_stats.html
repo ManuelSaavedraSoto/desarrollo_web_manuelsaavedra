@@ -52,168 +52,172 @@
     <div style="text-align: center; margin: 20px;">
         <button onclick="window.location.href='{{ url_for('index') }}'" style="margin-top: 20px;">Volver a Inicio</button>
     </div>
+{% endblock %}
 
+{% block scripts %}
     <script>
         // Get data from Flask
-        const chartData = {{ chart_data|safe }};
-        const activities = chartData.activities;
-
-        // Helper functions
-        function parseDate(dateString) {
-            const [day, month, year, time] = dateString.split(/[- :]/);
-            return new Date(`${year}-${month}-${day}T${time}:00`);
-        }
-
-        // Activities per Day
-        const activitiesPerDay = activities.reduce((acc, activity) => {
-            const date = parseDate(activity.start).toISOString().split('T')[0];
-            acc[date] = (acc[date] || 0) + 1;
-            return acc;
-        }, {});
-
-        const sortedDates = Object.keys(activitiesPerDay).sort();
-        const activityCounts = sortedDates.map(date => activitiesPerDay[date]);
-
-        new Chart(document.getElementById("activitiesPerDayChart"), {
-            type: "line",
-            data: {
-                labels: sortedDates,
-                datasets: [{
-                    label: "Actividades por Día",
-                    data: activityCounts,
-                    borderColor: "rgb(75, 192, 192)",
-                    backgroundColor: "rgba(75, 192, 192, 0.2)",
-                    fill: true,
-                    tension: 0.3
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
+        const apiURL = "{{ url_for('get_activities') }}";
+        fetch(apiURL)
+            .then(response => response.json())
+            .then(data => {
+                let themeData = data.theme_counts;
+                let activities = data.activities;
+                // Helper functions
+                function parseDate(dateString) {
+                    const [day, month, year, time] = dateString.split(/[- :]/);
+                    return new Date(`${year}-${month}-${day}T${time}:00`);
+                }
+                
+                // Activities per Day
+                const activitiesPerDay = activities.reduce((acc, activity) => {
+                    const date = parseDate(activity.start).toISOString().split('T')[0];
+                    acc[date] = (acc[date] || 0) + 1;
+                    return acc;
+                }, {});
+                
+                const sortedDates = Object.keys(activitiesPerDay).sort();
+                const activityCounts = sortedDates.map(date => activitiesPerDay[date]);
+                
+                new Chart(document.getElementById("activitiesPerDayChart"), {
+                    type: "bar",
+                    data: {
+                        labels: sortedDates,
+                        datasets: [{
+                            label: "Actividades por Día",
+                            data: activityCounts,
+                            borderColor: "rgb(75, 192, 192)",
+                            backgroundColor: "rgba(75, 192, 192, 0.2)",
+                            fill: true,
+                            tension: 0.3
+                        }]
                     },
-                    title: {
-                        display: true,
-                        text: 'Distribución Diaria de Actividades'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Distribución Diaria de Actividades'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
                         }
                     }
-                }
-            }
-        });
-
-        // Activities per Theme
-        const themeData = chartData.theme_counts;
-        // Capitalize theme names
-        const themes = Object.keys(themeData).map(theme => theme.charAt(0).toUpperCase() + theme.slice(1));
-        // Sort themes to put "Otros" at the end
-        themes.sort((a, b) => {
-            if (a === 'Otros') return 1;
-            if (b === 'Otros') return -1;
-            return a.localeCompare(b);
-        });
-        const themeCounts = themes.map(theme => themeData[theme]);
-
-        // Generate colors based on number of themes
-        const colors = themes.map((theme, i) => {
-            if (theme === 'Otros') {
-                return 'rgb(169, 169, 169)'; // Gray color for "Otros"
-            }
-            const hue = (i * 360) / (themes.length - 1); // -1 to account for "Otros"
-            return `hsl(${hue}, 70%, 60%)`;
-        });
-
-        new Chart(document.getElementById("activitiesPerThemeChart"), {
-            type: "pie",
-            data: {
-                labels: themes,
-                datasets: [{
-                    data: themeCounts,
-                    backgroundColor: colors
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Distribución por Temas'
+                });
+                
+                // Capitalize theme names
+                const themes = Object.keys(themeData).map(theme => theme.charAt(0).toUpperCase() + theme.slice(1));
+                // Sort themes to put "Otros" at the end
+                themes.sort((a, b) => {
+                    if (a === 'Otros') return 1;
+                    if (b === 'Otros') return -1;
+                    return a.localeCompare(b);
+                });
+                const themeCounts = themes.map(theme => themeData[theme]);
+                
+                // Generate colors based on number of themes
+                const colors = themes.map((theme, i) => {
+                    if (theme === 'Otros') {
+                        return 'rgb(169, 169, 169)'; // Gray color for "Otros"
                     }
-                }
-            }
-        });
-
-        // Activities by Time of Day
-        const timeOfDayCounts = activities.reduce((acc, activity) => {
-            const date = parseDate(activity.start);
-            const month = date.toLocaleString("es-CL", { month: "long" });
-            const hour = date.getHours();
-
-            const timeOfDay = hour < 12 ? "Mañana" : hour < 18 ? "Tarde" : "Noche";
-            acc[month] = acc[month] || { Mañana: 0, Tarde: 0, Noche: 0 };
-            acc[month][timeOfDay]++;
-            return acc;
-        }, {});
-
-        const months = Object.keys(timeOfDayCounts);
-        const morningCounts = months.map(month => timeOfDayCounts[month].Mañana);
-        const afternoonCounts = months.map(month => timeOfDayCounts[month].Tarde);
-        const eveningCounts = months.map(month => timeOfDayCounts[month].Noche);
-
-        new Chart(document.getElementById("activitiesByTimeChart"), {
-            type: "bar",
-            data: {
-                labels: months,
-                datasets: [
-                    {
-                        label: "Mañana",
-                        data: morningCounts,
-                        backgroundColor: "rgba(255, 159, 64, 0.8)"
+                    const hue = (i * 360) / (themes.length - 1); // -1 to account for "Otros"
+                    return `hsl(${hue}, 70%, 60%)`;
+                });
+                
+                new Chart(document.getElementById("activitiesPerThemeChart"), {
+                    type: "pie",
+                    data: {
+                        labels: themes,
+                        datasets: [{
+                            data: themeCounts,
+                            backgroundColor: colors
+                        }]
                     },
-                    {
-                        label: "Tarde",
-                        data: afternoonCounts,
-                        backgroundColor: "rgba(54, 162, 235, 0.8)"
-                    },
-                    {
-                        label: "Noche",
-                        data: eveningCounts,
-                        backgroundColor: "rgba(153, 102, 255, 0.8)"
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Distribución por Horario'
-                    }
-                },
-                scales: {
-                    x: { stacked: true },
-                    y: { 
-                        stacked: true,
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Distribución por Temas'
+                            }
                         }
                     }
-                }
-            }
-        });
+                });
+                
+                // Activities by Time of Day
+                const timeOfDayCounts = activities.reduce((acc, activity) => {
+                    const date = parseDate(activity.start);
+                    const month = date.toLocaleString("es-CL", { month: "long" });
+                    const hour = date.getHours();
+                    
+                    const timeOfDay = hour < 12 ? "Mañana" : hour < 18 ? "Tarde" : "Noche";
+                    acc[month] = acc[month] || { Mañana: 0, Tarde: 0, Noche: 0 };
+                    acc[month][timeOfDay]++;
+                    return acc;
+                }, {});
+                
+                const months = Object.keys(timeOfDayCounts);
+                const morningCounts = months.map(month => timeOfDayCounts[month].Mañana);
+                const afternoonCounts = months.map(month => timeOfDayCounts[month].Tarde);
+                const eveningCounts = months.map(month => timeOfDayCounts[month].Noche);
+                
+                new Chart(document.getElementById("activitiesByTimeChart"), {
+                    type: "bar",
+                    data: {
+                        labels: months,
+                        datasets: [
+                        {
+                            label: "Mañana",
+                            data: morningCounts,
+                            backgroundColor: "rgba(255, 159, 64, 0.8)"
+                        },
+                        {
+                            label: "Tarde",
+                            data: afternoonCounts,
+                            backgroundColor: "rgba(54, 162, 235, 0.8)"
+                        },
+                        {
+                            label: "Noche",
+                            data: eveningCounts,
+                            backgroundColor: "rgba(153, 102, 255, 0.8)"
+                        }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Distribución por Horario'
+                            }
+                        },
+                        scales: {
+                            x: { stacked: true },
+                            y: { 
+                                stacked: true,
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            });
     </script>
-{% endblock %}
+{% endblock scripts %}

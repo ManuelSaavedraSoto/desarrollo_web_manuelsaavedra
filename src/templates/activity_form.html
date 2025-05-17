@@ -3,6 +3,7 @@
 {% block title %} / Informar Actividad{% endblock %}
 {% block head %}
     {{ super() }}
+    <script>const apiURL = "{{ url_for('get_regiones') }}"</script>
     <script src="{{ url_for('static', filename='js/activity_form.js') }}"></script>
 {% endblock %}
 
