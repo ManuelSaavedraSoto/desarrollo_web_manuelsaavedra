@@ -74,6 +74,9 @@ def activity_detail(activity_id):
     """Route for the activity detail page."""
     session = Session()
     try:
+        # Sanitize activity_id
+        if not isinstance(activity_id, int) or activity_id <= 0:
+            abort(404)
         activity = session.query(Actividad).filter_by(id=activity_id).first()
         if not activity:
             abort(404)

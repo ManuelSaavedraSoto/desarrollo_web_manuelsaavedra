@@ -36,25 +36,27 @@ def get_normalized_contact_method(method):
 def get_inputs(req):
     """Extracts and validates inputs from the request."""
     inputs = {
-        "email": req.form.get("email"),
-        "phone": req.form.get("telefono"),
-        "start_time": req.form.get("init-input"),
-        "end_time": req.form.get("end-input"),
-        "comuna_id": req.form.get("comuna"),
-        "region_id": req.form.get("region"),
-        "name": req.form.get("name"),
-        "description": req.form.get("description"),
-        "sector": req.form.get("sector"),
+        "email": req.form.get("email", type=str),
+        "phone": req.form.get("telefono", type=str),
+        "start_time": req.form.get("init-input", type=str),
+        "end_time": req.form.get("end-input", type=str),
+        "comuna_id": req.form.get("comuna", type=int),
+        "region_id": req.form.get("region", type=int),
+        "name": req.form.get("name", type=str),
+        "description": req.form.get("description", type=str),
+        "sector": req.form.get("sector", type=str),
         "themes": [],
     }
 
     theme_inputs = [
-        (key, req.form[key]) for key in req.form if key.startswith("theme-")
+        (key, req.form.get(key, type=str))
+        for key in req.form
+        if key.startswith("theme-")
     ]
 
     for key, value in theme_inputs:
         if value == "Otro":
-            other_theme_value = req.form.get("other-theme")
+            other_theme_value = req.form.get("other-theme", type=str)
             if other_theme_value:
                 inputs["themes"].append(other_theme_value)
         else:
@@ -64,8 +66,8 @@ def get_inputs(req):
     inputs["contact_methods"] = {}
     i = 0
     while f"contact-method-{i}" in req.form:
-        method = req.form[f"contact-method-{i}"]
-        identifier = req.form[f"contact-identifier-{i}"]
+        method = req.form.get(f"contact-method-{i}", type=str)
+        identifier = req.form.get(f"contact-identifier-{i}", type=str)
         inputs["contact_methods"][method] = identifier
         i += 1
 
