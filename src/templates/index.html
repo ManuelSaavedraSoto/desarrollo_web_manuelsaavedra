@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <!-- Title & Message -->
+    <h1>U-Actividades</h1>
+    <p>Bienvenido a U-Actividades, tu plataforma para descubrir y compartir actividades universitarias. Aquí podrás encontrar las últimas actividades registradas y participar en la comunidad.</p>
+        
+    <!-- Menu -->
+    <div class="nav-buttons">
+        <button onclick="window.location.href='{{ url_for('activity_form') }}'">Informar Actividad</button>
+        <button onclick="window.location.href='{{ url_for('activity_list') }}'">Lista de Actividades</button>
+        <button onclick="window.location.href='{{ url_for('activity_stats') }}'">Estadísticas</button>
+    </div>
+
+    <!-- Latest Activities -->
+    <h2>Últimas Actividades</h2>
+    <div>
+        <table class="full-width-table">
+            <thead>
+                <tr>
+                    <th>Inicio</th>
+                    <th>Término</th>
+                    <th>Comuna</th>
+                    <th>Sector</th>
+                    <th>Tema</th>
+                    <th>Foto</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for actividad in actividades[-5:] %}
+                <tr onclick="window.location.href='{{ url_for('activity_detail', activity_id=actividad.id) }}'" class="btn-row">
+                    <td>{{ actividad.dia_hora_inicio.strftime('%d-%m-%Y %H:%M') }}</td>
+                    <td>{{ actividad.dia_hora_termino.strftime('%d-%m-%Y %H:%M') if actividad.dia_hora_termino else 'No especificado' }}</td>
+                    <td>{{ actividad.comuna.nombre }}</td>
+                    <td>{{ actividad.sector if actividad.sector else 'No especificado' }}</td>
+                    <td>
+                        {% for tema in actividad.temas %}
+                            {% if tema.tema == 'otro' %}
+                                {{ tema.glosa_otro }}
+                            {% else %}
+                                {{ tema.tema|capitalize }}
+                            {% endif %}
+                            {% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% if actividad.fotos %}
+                        <img src="{{ url_for('static', filename=actividad.fotos[0].ruta_archivo) }}" alt="Foto 1" width="64" height="64" style="object-fit: cover; border-radius: 4px;">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='media/placeholder.png') }}" alt="Sin foto" width="64" height="64" style="object-fit: cover; border-radius: 4px;">
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // Check for success parameter in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success')) {
+            showToast('Actividad registrada exitosamente', 'success');
+        }
+    </script>
+{% endblock %}

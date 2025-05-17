@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/common_ui.js') }}"></script>
+    <title>U-Actividades{% block title %}{% endblock %}</title>
+    {% endblock %}
+</head>
+<body>
+    <div class="container">
+        <!-- Toast container -->
+        <div id="toast-container"></div>
+        <!-- Page Content -->
+        <div id="content" class="content">
+            {% block content %}
+            {% endblock %}
+        </div>
+        <!-- Page Footer -->
+        <div id="footer" class="footer">
+            {% block footer %}
+            {% endblock %}
+        </div>
+    </div>
+<!-- Scripts -->
+{% block scripts %}
+{% endblock %}
+</body>
+</html>
