@@ -57,7 +57,7 @@
 {% block scripts %}
     <script>
         // Get data from Flask
-        const apiURL = "{{ url_for('get_activities') }}";
+        const apiURL = "{{ url_for('get_activities_stats') }}";
         fetch(apiURL)
             .then(response => response.json())
             .then(data => {

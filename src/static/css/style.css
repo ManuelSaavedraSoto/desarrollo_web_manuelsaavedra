@@ -47,6 +47,7 @@ input, select, textarea {
     border: 1px solid #ddd;
     border-radius: var(--border-radius);
     box-sizing: border-box;
+    font-size: medium;
 }
 
 /* Checkbox Groups */
@@ -55,12 +56,23 @@ input, select, textarea {
     flex-direction: column;
     gap: 8px;
     margin-bottom: var(--spacing);
+    max-width: 500px;
 }
 
 .checkbox-item {
     display: flex;
     align-items: center;
     gap: 8px;
+    padding: 8px 12px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.checkbox-item:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .checkbox-item input[type="checkbox"] {
@@ -72,6 +84,133 @@ input, select, textarea {
 .checkbox-item label {
     margin: 0;
     cursor: pointer;
+    flex: 1;
+}
+
+/* Input Groups */
+.input-group { 
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    max-width: 500px;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-bottom: var(--spacing);
+    border: 1px solid #ddd;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: white;
+} 
+
+.input-group:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.input-group-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    background-color: var(--background-color);
+    border-right: 1px solid #ddd;
+}
+
+.input-group-checkbox input[type="checkbox"] {
+    width: auto; margin: 0; cursor: pointer;
+}
+
+.input-group label {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #e9ecef;
+    color: var(--text-color);
+    text-align: center;
+    white-space: nowrap;
+    border-right: 1px solid #ddd;
+    cursor: pointer;
+
+}
+
+.input-group .form-control {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.input-group.error {
+    border-color: var(--error-color);
+}
+
+/* Input Group + Checkbox Group */
+.checkbox-group .input-group {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    width: 100%;
+}
+
+/* Style for checkbox-group when it contains an input-group */
+.checkbox-group-with-input {
+    max-width: 500px;
+    margin-bottom: var(--spacing);
+}
+
+.checkbox-group-with-input .checkbox-item:not(:last-child) {
+    margin-bottom: 8px;
+}
+
+/* If you need to align a checkbox with the input group label */
+.checkbox-group .input-group-with-checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.checkbox-group .input-group-with-checkbox input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.checkbox-group .input-group-with-checkbox .input-group {
+    margin-left: 0;
+    width: 100%;
+}
+
+/* Ensure the input-group within checkbox-group maintains styles */
+.checkbox-group .input-group:focus-within,
+.checkbox-item:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix for nested structure if needed */
+.checkbox-item .input-group {
+    flex: 1;
+    margin-bottom: 0;
+    border: none;
+    box-shadow: none;
+}
+
+/* Selected state for checkboxes */
+.checkbox-item input[type="checkbox"]:checked + label {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+/* Disabled state */
+.checkbox-item.disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.checkbox-item.disabled input[type="checkbox"],
+.checkbox-item.disabled label {
+    cursor: not-allowed;
 }
 
 /* Buttons */

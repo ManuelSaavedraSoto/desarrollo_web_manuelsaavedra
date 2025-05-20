@@ -24,9 +24,9 @@ Base = declarative_base()
 def db_init():
     """Initialize the database and create all tables."""
     # Import models here to avoid circular imports
-    from . import (
+    from . import (  # pylint: disable=import-outside-toplevel disable=unused-import
         models,
-    )  # pylint: disable=import-outside-toplevel disable=unused-import
+    )
 
     # Create all tables in the database
     Base.metadata.create_all(engine)

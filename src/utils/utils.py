@@ -4,7 +4,6 @@ import os
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from db import Actividad, ContactarPor, ActividadTema, Foto
-from .validation import validate_photo
 
 # Constants
 THEME_MAPPING = {
@@ -125,7 +124,7 @@ def process_photos(session, inputs, actividad_id, upload_folder):
     """
     # Process main photo (mandatory)
     photo = inputs["photo_1"]
-    if photo and validate_photo(photo):
+    if photo:
         ext = os.path.splitext(secure_filename(photo.filename))[1].lower()
         new_filename = f"{actividad_id}_1{ext}"
         photo_path = os.path.join("uploads", new_filename)
@@ -146,8 +145,6 @@ def process_photos(session, inputs, actividad_id, upload_folder):
     # Process optional photos
     i = 2
     for photo in inputs["opt-photos"]:
-        if not photo or not validate_photo(photo):
-            continue
 
         ext = os.path.splitext(secure_filename(photo.filename))[1].lower()
         new_filename = f"{actividad_id}_{i}{ext}"

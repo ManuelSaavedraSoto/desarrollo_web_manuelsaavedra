@@ -1,74 +1,79 @@
 // Form Input Handling Functions
 var regionJSON = null;
 
+async function fetchRegions() {
+    try {
+        const response = await fetch(apiURL);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        regionJSON = data;
+
+    }  catch (error) {
+        console.error('Error:', error);
+    }
+}
+
 function handleRegionSelection(event) {
-    const comunaSelect = document.getElementById('comuna-select');
+    const comunaSelect = document.getElementById(inputId.comuna);
     const selectedRegionId = event.target.value;
     
     if (!(selectedRegionId === undefined)) {
-        removeErrorLabel('region-select');
+        removeErrorLabel(inputId.region);
     }
 
     // Reset and enable comuna select
     comunaSelect.disabled = false;
-    comunaSelect.innerHTML = '<option value="" selected disabled>Por favor elija una comuna.</option>';
-    
-    // Find selected region in fetched JSON
-    const selectedRegion = regionJSON.find(region => region.id === parseInt(selectedRegionId));
-    
-    if (!(selectedRegion === undefined)) {
-        comunaSelect.classList.remove('error');
-        // Populate comuna select with options
-        selectedRegion.comunas.forEach(comuna => {
-            const option = document.createElement('option');
-            option.value = comuna.id;
-            option.textContent = comuna.nombre;
-            comunaSelect.appendChild(option);
-        });
-    }
+    comunaSelect.value = '';
+    Array.from(comunaSelect).forEach(comuna => {
+        let comunaRegionId = comuna.getAttribute("data-region-id")
+        comuna.hidden = comunaRegionId !== selectedRegionId;
+    });
 }
 
 function handleComunaSelection(event) {
     const selectedComunaId = event.target.value;
     
     if (!(selectedComunaId === undefined)) {
-        removeErrorLabel('comuna-select');
+        removeErrorLabel(inputId.comuna);
     }
 }
 
 function handleThemeSelection(checkbox) {
     if (checkbox.checked) {
-        removeErrorLabel('theme-inputs');
+        removeErrorLabel('themes');
     }
 
-    if (checkbox.id === 'other-theme') {
-        const otherThemeInputDiv = document.getElementById('other-theme-input');
-        const otherThemeTextInput = document.getElementById('other-theme-text-input');
+    if (checkbox.id === inputId.temaOtro.checkbox) {
+        const otherThemeTextInput = document.getElementById(inputId.temaOtro.text);
 
-        if (checkbox.checked) {
-            otherThemeInputDiv.hidden = false;
-            otherThemeTextInput.required = true;
-        } else {
-            otherThemeInputDiv.hidden = true;
-            otherThemeTextInput.required = false;
+        otherThemeTextInput.required = checkbox.checked;
+        otherThemeTextInput.disabled = !checkbox.checked;
+
+        if (!checkbox.checked) {
             otherThemeTextInput.value = "";
         }
     }
 }
 
 function handleContactSelection(selectedOption) {
-    const selectedOptions = Array.from(document.querySelectorAll('#contact-methods input:checked'));
-    const options = Array.from(document.querySelectorAll('#contact-methods input'));
+    const selectedOptions = Array.from(document.querySelectorAll('#rrss input[type=checkbox]:checked'));
+    const options = Array.from(document.querySelectorAll('#rrss input[type=checkbox]'));
+    let contactInt = parseInt(selectedOption.id.match(/\d/));
+    const selectedOptionInput = document.getElementById(inputId.rrss[contactInt].textId);
 
-    const selectedOptionDiv = document.getElementById(`contact-${selectedOption.value}`);
-    const selectedOptionInput = document.getElementById(`contact-${selectedOption.value}-input`);
-
-    selectedOptionDiv.hidden = !selectedOption.checked;
     selectedOptionInput.required = selectedOption.checked;
-    if (!selectedOption.checked) selectedOptionInput.value = "";
+    selectedOptionInput.disabled = !selectedOption.checked;
+    if (!selectedOption.checked) {
+        selectedOptionInput.value = "";
+    }
 
     if (selectedOptions.length > 0) {
-        removeErrorLabel('contact-methods');
+        const methods = document.querySelectorAll('#rrss .input-group');
+        methods.forEach(method => {
+            method.classList.remove('error');
+        });
     }
 
     options.forEach(option => {
@@ -84,8 +89,7 @@ function handleEndDateTimeInput(startInput) {
         startInput.classList.remove('error');
     }
     
-    const endInput = document.getElementById('end-datetime');
-    const errorLabel = document.getElementById('end-datetime-error-label');
+    const endInput = document.getElementById(inputId.dateEnd);
     
     if (!startInput.value) {
         endInput.value = '';
@@ -111,13 +115,12 @@ function handleEndDateTimeInput(startInput) {
     endInput.min = minDate.toISOString().slice(0, -8);
     endInput.disabled = false;
 
-    errorLabel.hidden = true;
-    removeErrorLabel('end-datetime');
+    removeErrorLabel(inputId.dateEnd);
 }
 
 function handleOptionalPhotoInputs(enable) {
-    for (let i = 2; i <= 5; i++) {
-        const input = document.getElementById(`foto-input-${i}`);
+    for (let i = 1; i <= 4; i++) {
+        const input = document.getElementById(inputId.photos[i]);
         input.disabled = !enable;
         if (!enable) {
             input.value = ''; // Clear the input when disabling
@@ -127,66 +130,69 @@ function handleOptionalPhotoInputs(enable) {
 
 // Form Validation Functions
 function validateName() {
-    const nameInput = document.getElementById('name-input');
+    const nameInput = document.getElementById(inputId.nombre);
     let isValid = true;
 
     if (!nameInput.value || nameInput.value.length > 200) {
-        addErrorLabel('name-input', 'Nombre inválido. Máximo 200 caracteres');
+        addErrorLabel(inputId.nombre, 'Nombre inválido. Máximo 200 caracteres');
         isValid = false;
     } else {
-        removeErrorLabel('name-input');
+        removeErrorLabel(inputId.nombre);
     }
 
     return isValid;
 }
 
 function validateRegionComuna() {
-    const regionSelect = document.getElementById('region-select');
-    const comunaSelect = document.getElementById('comuna-select');
-    const regionData = regionJSON.find(region => region.id === parseInt(regionSelect.value));
-    
-    if (!(regionData === undefined)) {
-        const selectedComuna = regionData.comunas.find(comuna => comuna.id === parseInt(comunaSelect.value));
-        if (!(selectedComuna === undefined)) {
-            removeErrorLabel('region-select');
-            comunaSelect.classList.remove('error');
-            return true;
-        } else {
-            comunaSelect.classList.add('error');
+    const regionSelect = document.getElementById(inputId.region);
+    const comunaSelect = document.getElementById(inputId.comuna)
+    const selectedRegionId = parseInt(regionSelect.options[regionSelect.selectedIndex].value);
+    const selectedComunaId = parseInt(comunaSelect.options[comunaSelect.selectedIndex].value);
+    const selectedComunaRegionId = parseInt(comunaSelect.options[comunaSelect.selectedIndex].getAttribute('data-region-id'));
+    const regionData = regionJSON.find(region => region.id === parseInt(selectedRegionId));
+
+    if ( regionData !== undefined) {
+        if (selectedComunaRegionId !== regionData.id) {
+            addErrorLabel(inputId.comuna, "Comuna Invalida.");
             return false;
         }
+        comunaData = regionData.comunas.find(comuna => comuna.id === selectedComunaId)
+        if ( comunaData !== undefined ) {
+            removeErrorLabel(inputId.comuna);
+            return true;
+        }
     } else {
-        regionSelect.classList.add('error');
-        comunaSelect.classList.add('error');
+        addErrorLabel(inputId.region, "Región Invalida.");
+        addErrorClass(inputId.comuna);
         return false;
     }
 }
 
 function validateEmail() {
-    const emailInput = document.getElementById('email-input');
+    const emailInput = document.getElementById(inputId.email);
     let isValid = true;
     let email_pattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
     if (!email_pattern.test(emailInput.value)) {
-        emailInput.classList.add('error');
+        addErrorLabel(inputId.email, 'Email invalido.');
         isValid = false;
     } else {
-        removeErrorLabel('error');
+        removeErrorLabel(inputId.email);
     }
 
     return isValid;
 }
 
 function validateTel() {
-    const telInput = document.getElementById('tel-input');
+    const telInput = document.getElementById(inputId.tel);
     let tel_pattern = /\+[0-9]{3}\.[0-9]{8}/;
     let isValid = true;
 
     if (!tel_pattern.test(telInput.value)) {
-        addErrorLabel('tel-input', 'Teléfono inválido. Formato esperado: +56.12345678');
+        addErrorLabel(inputId.tel, 'Teléfono inválido. Formato esperado: +56.12345678');
         isValid = false;
     } else {
-        removeErrorLabel('tel-input');
+        removeErrorLabel(inputId.tel);
     }
 
     return isValid;
@@ -194,24 +200,21 @@ function validateTel() {
 
 function validateFoto(input) {
     const fileId = input.id;
-    const errorLabel = document.getElementById(`foto-type-error-label-${fileId.split('-')[2]}`);
     const file = input.files[0];
     
     // Reset error state
-    errorLabel.hidden = true;
     input.classList.remove('error');
     
     if (file) {
         const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (!validTypes.includes(file.type)) {
-            errorLabel.hidden = false;
             input.value = '';
             input.classList.add('error');
             return false;
         }
         
         // If this is foto-input-1, enable other photo inputs
-        if (fileId === 'foto-input-1') {
+        if (fileId === inputId.photos[0]) {
             handleOptionalPhotoInputs(true);
         }
         
@@ -222,7 +225,7 @@ function validateFoto(input) {
     }
     
     // If this is foto-input-1 being cleared, disable other photo inputs
-    if (fileId === 'foto-input-1') {
+    if (fileId === inputId.photos[0]) {
         handleOptionalPhotoInputs(false);
     }
     
@@ -230,19 +233,19 @@ function validateFoto(input) {
 }
 
 function validatePhotos() {
-    const firstPhoto = document.getElementById('foto-input-1');
+    const firstPhoto = document.getElementById(inputId.photos[0]);
     
     // Reset error states
-    removeErrorLabel('foto-input-1');
+    removeErrorLabel(inputId.photos[0]);
     
     if (!firstPhoto.files.length) {
-        addErrorLabel('foto-input-1', 'Primera foto es obligatoria');
+        addErrorLabel(inputId.photos[0], 'Primera foto es obligatoria');
         return false;
     }
     
     // Validate all photo inputs
-    for (let i = 1; i <= 5; i++) {
-        const input = document.getElementById(`foto-input-${i}`);
+    for (let i = 0; i < 5; i++) {
+        const input = document.getElementById(inputId.photos[i]);
         if (input.files.length && !validateFoto(input)) {
             return false;
         }
@@ -251,13 +254,13 @@ function validatePhotos() {
 }
 
 function validateThemes() {
-    const themeInputs = document.querySelectorAll('#theme-inputs input[type="checkbox"]');
+    const themeInputs = document.querySelectorAll('#themes input[type="checkbox"]');
     const selectedThemes = Array.from(themeInputs).filter(input => input.checked);
-    const otherThemeCheckbox = document.querySelector('#theme-inputs input[value="Otro"]');
-    const otherThemeInput = document.getElementById('other-theme-text-input');
+    const otherThemeCheckbox = document.getElementById(inputId.temaOtro.checkbox);
+    const otherThemeInput = document.getElementById(inputId.temaOtro.text);
 
     if (selectedThemes.length === 0) {
-        const themes = document.querySelectorAll('#theme-inputs');
+        const themes = document.querySelectorAll('#themes');
         themes.forEach(theme => {
             theme.classList.add('error');
         });
@@ -276,13 +279,11 @@ function validateThemes() {
 }
 
 function validateEndDateTimeInput(endInput) {    
-    const startInput = document.getElementById('init-datetime');
-    const errorMsg = document.getElementById('end-datetime-error-label');
+    const startInput = document.getElementById(inputId.dateStart);
     
     // If end date is empty, it's valid (will use default)
     if (!endInput.value) {
         endInput.classList.remove('error');
-        errorMsg.hidden = true;
         return true;
     }
 
@@ -297,18 +298,15 @@ function validateEndDateTimeInput(endInput) {
     
     if (!isValid) {
         endInput.classList.add('error');
-        errorMsg.textContent = 'La fecha de término debe ser al menos 1 hora después del inicio';
     } else {
         endInput.classList.remove('error');
     }
     
-    errorMsg.hidden = isValid;
-
     return isValid;
 }
 
 function validateDateTime() {
-    const startInput = document.getElementById('init-datetime');
+    const startInput = document.getElementById(inputId.dateStart);
     
     if (!startInput.value) {
         startInput.classList.add('error');
@@ -326,7 +324,7 @@ function validateDateTime() {
     startInput.classList.remove('error');
     
     // For end time validation, if it's empty we'll use default
-    const endInput = document.getElementById('end-datetime');
+    const endInput = document.getElementById(inputId.dateEnd);
     if (!endInput.value) {
         return true;
     }
@@ -334,12 +332,24 @@ function validateDateTime() {
     return validateEndDateTimeInput(endInput);
 }
 
+function validateContactText(input) {
+    const value = input.value;
+    let isValid = true;
+    if (!input.value || input.value.length < 4 || input.value.length > 50) {
+        input.classList.add('error');
+        isValid = false;
+    } else {
+        input.classList.remove('error');
+    }
+    return isValid;
+}
+
 function validateContacts() {
-    const selectedMethods = document.querySelectorAll('#contact-methods input:checked');
+    const selectedMethods = document.querySelectorAll('#rrss input:checked');
     const selectedMethodsArr = Array.from(selectedMethods);
-    
+    let isValid = true;
     if (selectedMethodsArr.length === 0) {
-        const methods = document.querySelectorAll('#contact-methods');
+        const methods = document.querySelectorAll('#rrss .input-group');
         methods.forEach(method => {
             method.classList.add('error');
         });
@@ -347,14 +357,12 @@ function validateContacts() {
     }
 
     for (let method of selectedMethodsArr) {
-        const input = document.getElementById(`contact-${method.value}-input`);
-        if (!input.value || input.value.length < 4 || input.value.length > 50) {
-            input.classList.add('error');
-            return false;
-        }
+        let contactInt = parseInt(method.id.match(/\d/));
+        const input = document.getElementById(inputId.rrss[contactInt].textId);
+        isValid = validateContactText(input);
     }
     
-    return true;
+    return isValid;
 }
 
 function validateForm() {
@@ -405,7 +413,9 @@ function setSubmitting(submitting) {
 
 // Form Submission Functions
 function loadForm() {
-    const initDateInput = document.getElementById("init-datetime");
+    const initDateInput = document.getElementById(inputId.dateStart);
+    const regionSelect = document.getElementById(inputId.region);
+    const comunaSelect = document.getElementById(inputId.comuna);
 
     let now = new Date(Date.now());
     now.setTime(now.getTime() - 4 * 3600 * 1000);
@@ -415,13 +425,19 @@ function loadForm() {
     handleOptionalPhotoInputs(false);
     
     // Initialize name input
-    document.getElementById('name-input').addEventListener('change', validateName);
+    document.getElementById(inputId.nombre).addEventListener('change', validateName);
+
+    // Initialize telephone input
+    document.getElementById(inputId.tel).addEventListener('change', validateTel);
 
     // Initialize region selector
-    document.getElementById('region-select').addEventListener("change", handleRegionSelection);
+    regionSelect.addEventListener("change", handleRegionSelection);
+    regionSelect.value = '';
 
     // Initialize comuna selector
-    document.getElementById('comuna-select').addEventListener("change", handleComunaSelection);
+    comunaSelect.addEventListener("change", handleComunaSelection);
+    comunaSelect.value = '';
+    comunaSelect.disabled = true;
 
     // Initialize form submission handlers
     document.getElementById('verify-btn').addEventListener('click', () => {
@@ -472,36 +488,14 @@ async function submitForm() {
     const form = document.getElementById('actividad-form');
     const formData = new FormData(form);
 
-    // Add selected themes to form data
-    const selectedThemes = document.querySelectorAll('#theme-inputs input[type="checkbox"]:checked');
-    selectedThemes.forEach((theme, index) => {
-        if (theme.value === 'Otro') {
-            const otherThemeValue = document.getElementById('other-theme-text-input').value;
-            if (otherThemeValue) {
-                formData.append(`theme-${index}`, otherThemeValue);
-            }
-        } else {
-            formData.append(`theme-${index}`, theme.value);
-        }
-    });
-
-    // Add contact methods to form data
-    const selectedContacts = document.querySelectorAll('#contact-methods input[type="checkbox"]:checked');
-    selectedContacts.forEach((contact, index) => {
-        const method = contact.value;
-        const identifier = document.getElementById(`contact-${method}-input`).value;
-        formData.append(`contact-method-${index}`, method);
-        formData.append(`contact-identifier-${index}`, identifier);
-    });
-
     try {
         const response = await fetch(window.location.href, {
             method: 'POST',
             body: formData,
             enctype: 'multipart/form-data',
         });
-
         const result = await response.json();
+        console.log(result);
         
         if (result.success) {
             // Redirect immediately on success, toast will be shown on index page

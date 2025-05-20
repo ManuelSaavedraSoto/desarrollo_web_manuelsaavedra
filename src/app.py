@@ -2,14 +2,14 @@
 
 import os
 from flask import Flask, request, jsonify, render_template, abort, url_for
-from db import db_init, Session, Region, Actividad
+from db import db_init, Session, Region, Actividad, Comuna
 from utils import (
     get_inputs,
     create_activity,
     process_photos,
     process_themes,
     process_contact_methods,
-    validate_inputs,
+    ActivityForm,
 )
 
 db_init()  # Initialize the database
@@ -57,13 +57,27 @@ def activity_list():
 def activity_form():
     """Route for the activity upload form."""
     session = Session()
+    form = ActivityForm(meta={"csrf": False})
+    regiones = session.query(Region).all()
+    comunas = session.query(Comuna).all()
+    form.region.choices += [(region.id, region.nombre) for region in regiones]
+    form.comuna.choices += [
+        (
+            comuna.id,
+            comuna.nombre,
+            {"hidden": True, "data-region-id": comuna.region.id},
+        )
+        for comuna in comunas
+    ]
     try:
-        if request.method == "GET":
-            regiones = session.query(Region).all()
-            return render_template("activity_form.html", regiones=regiones)
+        if request.method == "POST":
+            if form.validate():
+                return jsonify({"success": True}), 200
 
-        # Handle POST request
-        return handle_activity_post(session, request)
+            return jsonify({"error": form.errors}), 400
+
+        return render_template("activity_form.html", form=form)
+
     finally:
         session.close()
 
@@ -115,8 +129,9 @@ def get_regiones():
     finally:
         session.close()
 
-@app.route("/api/actividades")
-def get_activities():
+
+@app.route("/api/actividades/stats")
+def get_activities_stats():
     """API endpoint for activities"""
     session = Session()
     try:
@@ -156,6 +171,7 @@ def get_activities():
     finally:
         session.close()
 
+
 @app.route("/api/actividades/paginated", methods=["POST"])
 def get_paginated_activities():
     """API endpoint for paginated activities."""
@@ -181,7 +197,7 @@ def get_paginated_activities():
         data = {
             "currentPage": page,
             "totalPages": total_pages,
-            "html": html, 
+            "html": html,
         }
 
         return data
@@ -193,11 +209,6 @@ def handle_activity_post(session, req):
     """Handles the POST request for activity creation."""
     try:
         inputs = get_inputs(req)
-        errors = validate_inputs(inputs, session)
-
-        if errors:
-            return jsonify(errors), 400
-
         actividad = create_activity(inputs)
         session.add(actividad)
         session.flush()
