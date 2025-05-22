@@ -3,14 +3,7 @@
 import os
 from flask import Flask, request, jsonify, render_template, abort, url_for
 from db import db_init, Session, Region, Actividad, Comuna
-from utils import (
-    get_inputs,
-    create_activity,
-    process_photos,
-    process_themes,
-    process_contact_methods,
-    ActivityForm,
-)
+from activityform import ActivityForm, process_activity_form
 
 db_init()  # Initialize the database
 
@@ -72,7 +65,7 @@ def activity_form():
     try:
         if request.method == "POST":
             if form.validate():
-                return jsonify({"success": True}), 200
+                return process_activity_form(session, form, app.config["UPLOAD_FOLDER"])
 
             return jsonify({"error": form.errors}), 400
 
@@ -203,27 +196,3 @@ def get_paginated_activities():
         return data
     finally:
         session.close()
-
-
-def handle_activity_post(session, req):
-    """Handles the POST request for activity creation."""
-    try:
-        inputs = get_inputs(req)
-        actividad = create_activity(inputs)
-        session.add(actividad)
-        session.flush()
-
-        # Process all activity data
-        process_photos(session, req, actividad.id, app.config["UPLOAD_FOLDER"])
-        process_themes(session, inputs["themes"], actividad.id)
-        process_contact_methods(session, req, actividad.id)
-
-        session.commit()
-        return jsonify({"success": True}), 200
-
-    except ValueError as val_err:
-        session.rollback()
-        return jsonify({"error": str(val_err)}), 400
-    except Exception as err:  # pylint: disable=broad-except
-        session.rollback()
-        return jsonify({"error": f"Error inesperado: {str(err)}"}), 500

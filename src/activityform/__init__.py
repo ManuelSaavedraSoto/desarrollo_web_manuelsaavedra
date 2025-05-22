@@ -1,20 +1,22 @@
 """Package for utility and validation modules."""
 
-from .utils import (
+from .handling import (
     get_inputs,
-    create_activity,
+    process_activity,
     process_photos,
     process_themes,
-    process_contact_methods,
+    process_rrss,
+    process_activity_form,
 )
 
-from .activity_form import ActivityForm
+from .form import ActivityForm
 
 __all__ = [
     "get_inputs",
-    "create_activity",
+    "process_activity",
     "process_photos",
     "process_themes",
-    "process_contact_methods",
+    "process_rrss",
+    "process_activity_form",
     "ActivityForm",
 ]
