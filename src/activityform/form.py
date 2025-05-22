@@ -16,28 +16,6 @@ from wtforms import (
 
 FILENAME_REGEXP = r"^([\/].+)+\.(jpg|png|jpeg)$"
 
-RRSS_MAPPING = [
-    ("WhatsApp", "whatsapp"),
-    ("Telegram", "telegram"),
-    ("X", "X"),
-    ("Instagram", "instagram"),
-    ("Tik-Tok", "tiktok"),
-    ("Otro", "otra"),
-]
-
-THEME_MAPPING = [
-    ("Música", "música"),
-    ("Deporte", "deporte"),
-    ("Ciencias", "ciencias"),
-    ("Religión", "religión"),
-    ("Política", "política"),
-    ("Tecnología", "tecnología"),
-    ("Juegos", "juegos"),
-    ("Baile", "baile"),
-    ("Comida", "comida"),
-    ("Otro", "otro"),
-]
-
 
 class RequiredGroup:
     """Validates that at least one field of the group has data."""

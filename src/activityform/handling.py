@@ -154,11 +154,9 @@ def process_activity_form(session, form: ActivityForm, path):
     try:
         inputs = get_inputs(form)
         activity_id = process_activity(session, inputs)
-
         process_photos(session, inputs, activity_id, path)
         process_themes(session, inputs, activity_id)
         process_rrss(session, inputs, activity_id)
-
         session.commit()
         return jsonify({"success": True}), 200
     except ValueError as val_err:
