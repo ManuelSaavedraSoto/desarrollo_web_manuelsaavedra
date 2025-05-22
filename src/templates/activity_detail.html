@@ -2,6 +2,10 @@
 
 {% block title %} / Detalles{% endblock %}
 
+{% block head %}
+    <script scr="{{ url_for('static', filename='js/activity_detail.js') }}"></script>
+{% endblock %}
+
 {% block content %}
     <h1>Detalles de la Actividad</h1> 
     <div class="nav-buttons">
@@ -89,11 +93,48 @@
             </div>
         </div>
         {% endif %}
+        <div id="comments-container" class="detail-section">
+            <h3>Comentarios</h3>
+            {% if actividad.comentarios %}
+                {% for comment in actividad.comentarios %}
+                    <div class="activity-comment">
+                        <h5>{{ comment.nombre }}</h5>
+                        <p style="color: lightgrey;">{{ comment.fecha }}</p>
+                        {{ comment.texto }}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <h4 style="color: grey;">No hay comentarios en esta actividad.</h4>
+            {% endif %}
+        </div>
+        <div id="comment-form-container" class="detail-section">
+            <h3>Subir comentario:</h3>
+            <form class="embedded-form" action="comment-form" onsubmit="return false;" method="POST">
+                {{ form.date() }}
+                {{ form.activity_id() }}
+                <div>
+                    <div>
+                        {{ form.name.label }}
+                    </div>
+                    {{ form.name(style="width: 50%;") }}
+                </div>
+                <div>
+                    <div>
+                        {{ form.text.label }}
+                    </div>
+                    {{ form.text(rows=4, cols=50, style="width: 50%;") }}
+                </div>
+                <div>
+                    <button type="submit" id="submit-btn">Subir comentario</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <div id="window-image" class="floating-image">
         <button onclick="toggleWindow('image', '{{ def_src }}')" class="close-button" aria-label="Cerrar">&times;</button>
         <img src="{{ url_for('static', filename='media/placeholder.png') }}" id="enlarged-image" alt="Imagen Ampliada">
     </div>
+
     <div id="overlay" class="overlay" onclick="toggleWindow('image', '{{ def_src }}')"></div>
 {% endblock %}

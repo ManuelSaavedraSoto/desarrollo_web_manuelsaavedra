@@ -1,22 +1,20 @@
-"""Package for utility and validation modules."""
+"""Package for activity form modules."""
 
-from .handling import (
+from .processing import (
     get_inputs,
-    process_activity,
     process_photos,
     process_themes,
     process_rrss,
-    process_activity_form,
+    process_activity,
 )
 
 from .form import ActivityForm
 
 __all__ = [
     "get_inputs",
-    "process_activity",
     "process_photos",
     "process_themes",
     "process_rrss",
-    "process_activity_form",
+    "process_activity",
     "ActivityForm",
 ]

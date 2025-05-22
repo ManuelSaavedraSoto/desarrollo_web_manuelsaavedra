@@ -52,6 +52,7 @@ class Actividad(Base):
     fotos = relationship("Foto", back_populates="actividad")
     temas = relationship("ActividadTema", back_populates="actividad")
     contactos = relationship("ContactarPor", back_populates="actividad")
+    comentarios = relationship("Comentario", back_populates="actividad")
 
 
 class Foto(Base):
@@ -120,3 +121,17 @@ class ActividadTema(Base):
 
     # Relationships
     actividad = relationship("Actividad", back_populates="temas")
+
+
+class Comentario(Base):
+    """Modelo ORM para comentarios"""
+
+    __tablename__ = "comentario"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nombre = Column(String(80), nullable=False)
+    texto = Column(String(300), nullable=False)
+    fecha = Column(DateTime, nullable=False)
+    actividad_id = Column(Integer, ForeignKey("actividad.id"), nullable=False)
+
+    # Relationships
+    actividad = relationship("Actividad", back_populates="comentarios")

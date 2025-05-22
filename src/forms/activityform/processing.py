@@ -52,7 +52,7 @@ def get_inputs(form: ActivityForm):
     return inputs
 
 
-def process_activity(session, inputs):
+def create_activity(session, inputs):
     """Creates an activity object from the validated inputs.
 
     If end_time is not provided or equals default (start_time + 3 hours),
@@ -149,11 +149,11 @@ def process_rrss(session, inputs, actividad_id):
             session.add(contacto)
 
 
-def process_activity_form(session, form: ActivityForm, path):
+def process_activity(session, form: ActivityForm, path):
     """Processes the form to add the new activity to the db."""
     try:
         inputs = get_inputs(form)
-        activity_id = process_activity(session, inputs)
+        activity_id = create_activity(session, inputs)
         process_photos(session, inputs, activity_id, path)
         process_themes(session, inputs, activity_id)
         process_rrss(session, inputs, activity_id)

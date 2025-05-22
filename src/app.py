@@ -1,9 +1,9 @@
 """Aplicación Flask para tarea 2 del curso CC5002"""
 
 import os
-from flask import Flask, request, jsonify, render_template, abort, url_for
+from flask import Flask, request, jsonify, render_template, abort
 from db import db_init, Session, Region, Actividad, Comuna
-from activityform import ActivityForm, process_activity_form
+from forms import ActivityForm, CommentForm, process_activity, process_comment
 
 db_init()  # Initialize the database
 
@@ -50,9 +50,9 @@ def activity_list():
 def activity_form():
     """Route for the activity upload form."""
     session = Session()
-    form = ActivityForm(meta={"csrf": False})
     regiones = session.query(Region).all()
     comunas = session.query(Comuna).all()
+    form = ActivityForm(meta={"csrf": False})
     form.region.choices += [(region.id, region.nombre) for region in regiones]
     form.comuna.choices += [
         (
@@ -65,7 +65,7 @@ def activity_form():
     try:
         if request.method == "POST":
             if form.validate():
-                return process_activity_form(session, form, app.config["UPLOAD_FOLDER"])
+                return process_activity(session, form, app.config["UPLOAD_FOLDER"])
 
             return jsonify({"error": form.errors}), 400
 
@@ -75,10 +75,11 @@ def activity_form():
         session.close()
 
 
-@app.route("/actividades/<int:activity_id>", methods=["GET"])
+@app.route("/actividades/<int:activity_id>", methods=["GET", "POST"])
 def activity_detail(activity_id):
     """Route for the activity detail page."""
     session = Session()
+    form = CommentForm(meta={"csrf": False})
     try:
         # Sanitize activity_id
         if not isinstance(activity_id, int) or activity_id <= 0:
@@ -86,11 +87,12 @@ def activity_detail(activity_id):
         activity = session.query(Actividad).filter_by(id=activity_id).first()
         if not activity:
             abort(404)
-        return render_template(
-            "activity_detail.html",
-            actividad=activity,
-            def_src=url_for("static", filename="media/placeholder.png"),
-        )
+        form.activity_id.data = activity_id
+        if request.method == "POST":
+            if form.validate():
+                return process_comment(session, form)
+            return jsonify({"error": form.errors}), 400
+        return render_template("activity_detail.html", actividad=activity, form=form)
     finally:
         session.close()
 

@@ -1,0 +1,1 @@
+// Scripts for activity_detail.html
