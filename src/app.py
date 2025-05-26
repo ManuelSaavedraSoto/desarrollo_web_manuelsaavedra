@@ -1,6 +1,7 @@
 """Aplicación Flask para tarea 2 del curso CC5002"""
 
 import os
+import datetime
 from flask import Flask, request, jsonify, render_template, abort
 from db import db_init, Session, Region, Actividad, Comuna
 from forms import ActivityForm, CommentForm, process_activity, process_comment
@@ -87,10 +88,11 @@ def activity_detail(activity_id):
         activity = session.query(Actividad).filter_by(id=activity_id).first()
         if not activity:
             abort(404)
-        form.activity_id.data = activity_id
         if request.method == "POST":
             if form.validate():
-                return process_comment(session, form)
+                form.activity_id.data = activity_id
+                now = datetime.datetime.now()
+                return process_comment(session, form, now)
             return jsonify({"error": form.errors}), 400
         return render_template("activity_detail.html", actividad=activity, form=form)
     finally:

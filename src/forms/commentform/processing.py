@@ -1,23 +1,23 @@
 """Module for processing comment forms"""
 
+import datetime
 from flask import jsonify
 from db import Comentario
 from .form import CommentForm
 
 
-def process_comment(session, form: CommentForm):
+def process_comment(session, form: CommentForm, timestamp: datetime.datetime):
     """Retrieves and sorts"""
     try:
         name = form.name.data
         text = form.text.data
-        date = form.date.data
         activity_id = form.activity_id.data
 
         comment = Comentario(
             actividad_id=activity_id,
             nombre=name,
             texto=text,
-            fecha=date,
+            fecha=timestamp,
         )
 
         session.add(comment)

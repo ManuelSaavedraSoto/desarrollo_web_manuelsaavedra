@@ -1,4 +1,5 @@
 -- Cleanup existing test data
+DELETE FROM comentario WHERE actividad_id IN (SELECT id FROM actividad WHERE email LIKE '%test%');
 DELETE FROM actividad_tema WHERE actividad_id IN (SELECT id FROM actividad WHERE email LIKE '%test%');
 DELETE FROM contactar_por WHERE actividad_id IN (SELECT id FROM actividad WHERE email LIKE '%test%');
 DELETE FROM foto WHERE actividad_id IN (SELECT id FROM actividad WHERE email LIKE '%test%');
@@ -73,3 +74,29 @@ INSERT INTO foto (ruta_archivo, nombre_archivo, actividad_id) VALUES
 ('uploads/cat_6.jpg', 'cat_6.jpg', (SELECT id FROM actividad WHERE email = 'test7@example.com')),
 ('uploads/cat_7.jpg', 'cat_7.jpg', (SELECT id FROM actividad WHERE email = 'test8@example.com')),
 ('uploads/cat_8.jpg', 'cat_8.jpg', (SELECT id FROM actividad WHERE email = 'test8@example.com'));
+
+-- Comments for activities
+INSERT INTO comentario (nombre, texto, fecha, actividad_id) VALUES
+('Juan Pérez', 'Me encantan los festivales gatunos, ¡definitivamente asistiré!', '2025-05-10 15:30:00', (SELECT id FROM actividad WHERE email = 'test1@example.com')),
+('María Silva', '¿Habrá zona de adopción para gatitos rescatados?', '2025-05-12 18:45:00', (SELECT id FROM actividad WHERE email = 'test1@example.com')),
+('Roberto Gómez', 'El año pasado fue increíble, no me lo pierdo este año', '2025-05-15 09:20:00', (SELECT id FROM actividad WHERE email = 'test1@example.com')),
+
+('Ana Torres', '¡Increíble! Por fin tecnología específica para gatos', '2025-05-18 14:25:00', (SELECT id FROM actividad WHERE email = 'test2@example.com')),
+('Carlos Ruiz', 'Me interesa mucho ver los robots alimentadores', '2025-05-19 11:10:00', (SELECT id FROM actividad WHERE email = 'test2@example.com')),
+
+('Laura González', '¿Los gatos realmente participan en competencias?', '2025-05-20 16:35:00', (SELECT id FROM actividad WHERE email = 'test3@example.com')),
+('Pablo Muñoz', 'Mi gato es muy ágil, ¡participaremos!', '2025-05-22 13:15:00', (SELECT id FROM actividad WHERE email = 'test3@example.com')),
+
+('Carmen López', 'Las fotos del año pasado fueron hermosas', '2025-05-15 20:40:00', (SELECT id FROM actividad WHERE email = 'test4@example.com')),
+('Diego Martínez', '¿Se pueden llevar cámaras profesionales?', '2025-05-17 17:50:00', (SELECT id FROM actividad WHERE email = 'test4@example.com')),
+
+('Sofía Castro', 'Me encanta la danza contemporánea, será fascinante', '2025-05-23 19:30:00', (SELECT id FROM actividad WHERE email = 'test5@example.com')),
+
+('Pedro Sánchez', '¿Habrá transmisión en vivo de las charlas?', '2025-05-24 12:20:00', (SELECT id FROM actividad WHERE email = 'test6@example.com')),
+('Elena Vargas', 'Me interesan las charlas sobre comportamiento felino', '2025-05-24 15:45:00', (SELECT id FROM actividad WHERE email = 'test6@example.com')),
+
+('Miguel Ángel', '¿Cuánto cuesta la entrada a la convención?', '2025-05-20 10:05:00', (SELECT id FROM actividad WHERE email = 'test7@example.com')),
+('Isabella Rojas', 'Vendré desde Valparaíso, ¡no me lo pierdo!', '2025-05-21 14:30:00', (SELECT id FROM actividad WHERE email = 'test7@example.com')),
+
+('Valentina Díaz', 'Excelente iniciativa para discutir políticas de protección', '2025-05-19 16:15:00', (SELECT id FROM actividad WHERE email = 'test8@example.com')),
+('Fernando Pinto', '¿Qué autoridades participarán en el debate?', '2025-05-22 11:25:00', (SELECT id FROM actividad WHERE email = 'test8@example.com'));
