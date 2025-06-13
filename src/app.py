@@ -10,6 +10,10 @@ db_init()  # Initialize the database
 
 app = Flask(__name__)
 
+# =============================================================================
+# Config
+# =============================================================================
+
 # Constants
 UPLOAD_FOLDER = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "static", "uploads"
@@ -25,6 +29,11 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def cleanup(exception=None):  # pylint: disable=unused-argument
     """Cleanup function to remove the session after each request."""
     Session.remove()
+
+
+# =============================================================================
+# Routes
+# =============================================================================
 
 
 @app.route("/", methods=["GET"])
@@ -44,7 +53,7 @@ def index():
 @app.route("/actividades", methods=["GET"])
 def activity_list():
     """Route for the activity list page."""
-    return render_template("activity_list.html")
+    return render_template("activities/list.html")
 
 
 @app.route("/actividades/subir", methods=["GET", "POST"])
@@ -70,7 +79,7 @@ def activity_form():
 
             return jsonify({"error": form.errors}), 400
 
-        return render_template("activity_form.html", form=form)
+        return render_template("activities/upload_form.html", form=form)
 
     finally:
         session.close()
@@ -84,7 +93,7 @@ def activity_detail(activity_id):
     try:
         # Sanitize activity_id
         if not isinstance(activity_id, int) or activity_id <= 0:
-            abort(404)
+            abort(400)
         activity = session.query(Actividad).filter_by(id=activity_id).first()
         if not activity:
             abort(404)
@@ -94,7 +103,7 @@ def activity_detail(activity_id):
                 now = datetime.datetime.now()
                 return process_comment(session, form, now)
             return jsonify({"error": form.errors}), 400
-        return render_template("activity_detail.html", actividad=activity, form=form)
+        return render_template("activities/details.html", actividad=activity, form=form)
     finally:
         session.close()
 
@@ -102,7 +111,12 @@ def activity_detail(activity_id):
 @app.route("/estadisticas", methods=["GET"])
 def activity_stats():
     """Route for the activity statistics page."""
-    return render_template("activity_stats.html")
+    return render_template("activities/stats.html")
+
+
+# =============================================================================
+# API Endpoints
+# =============================================================================
 
 
 @app.route("/api/regiones", methods=["GET"])
@@ -189,7 +203,7 @@ def get_paginated_activities():
             .all()
         )
 
-        html = render_template("activity_page.html", actividades=activities)
+        html = render_template("activities/_page.html", actividades=activities)
 
         data = {
             "currentPage": page,
@@ -200,3 +214,20 @@ def get_paginated_activities():
         return data
     finally:
         session.close()
+
+
+# =============================================================================
+# Error Handlers
+# =============================================================================
+
+
+@app.errorhandler(400)
+def bad_request(e):
+    """Error handler for 400 errors"""
+    return render_template("errors/400.html", error=e)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    """Error handler for 404 errors"""
+    return render_template("errors/404.html", error=e)

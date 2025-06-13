@@ -1,4 +1,4 @@
-// Scripts for activity_detail.html
+// Scripts for activities/details.html
 
 let isSubmitting = false;
 

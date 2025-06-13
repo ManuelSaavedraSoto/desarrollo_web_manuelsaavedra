@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %} / Error 400{% endblock %}
+
+{% block content %}
+    <div class="error-container">
+        <h1>Error 400: Solicitud Incorrecta</h1>
+        <p>{{ error }}</p>
+        <div class="error-actions">
+            <button onclick="window.location.href='{{ url_for('index') }}'">Volver a Inicio</button>
+            <button onclick="window.history.back()">Volver Atrás</button>
+        </div>
+    </div>
+{% endblock %}

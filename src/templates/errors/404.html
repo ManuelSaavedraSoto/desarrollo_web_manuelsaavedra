@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %} / Error 404{% endblock %}
+
+{% block content %}
+    <div class="error-container">
+        <h1>Error 404: Página No Encontrada</h1>
+        <p>Lo sentimos, la página que buscas no existe.</p>
+        <p>{{ error }}</p>
+        <div class="error-actions">
+            <button onclick="window.location.href='{{ url_for('index') }}'">Volver a Inicio</button>
+            <button onclick="window.history.back()">Volver Atrás</button>
+        </div>
+    </div>
+{% endblock %}
