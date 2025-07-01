@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Actividades</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="/css/style.css" />
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const apiURL = [[@{/api/activities/paginated}]];
+        const scoreURL = [[@{/api/activities/score}]];
+        /*]]>*/
+    </script>
+    <script th:src="@{/js/script.js}" src="/js/script.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h1>Lista de Actividades</h1>
+    <div class="nav-buttons">
+        <button disabled>Volver a Inicio</button>
+        <button disabled>Informar Actividad</button>
+    </div>
+    <div>
+        <table class="full-width-table">
+            <thead>
+                <tr>
+                    <th>Inicio</th>
+                    <th>Término</th>
+                    <th>Comuna</th>
+                    <th>Sector</th>
+                    <th>Tema</th>
+                    <th>Nombre</th>
+                    <th>Fotos</th>
+                    <th>Puntaje</th>
+                    <th>Evaluar</th>
+                </tr>
+            </thead>
+            <tbody id="activities-table-body" th:utext="${activitiesHtml}">
+                <!-- Activities will be loaded here by JS or server -->
+            </tbody>
+        </table>
+        <div id="pagination" class="pagination">
+            <!-- Pagination will be loaded here by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- Use the fragment from _eval_tooltip.html -->
+<div th:replace="~{_eval_tooltip :: star-tooltip}"></div>
+
+</body>
+</html>

@@ -1,110 +1,57 @@
-# Tarea 3 - Manuel Saavedra
+# Tarea 4 - Manuel Saavedra
 
 ## Estructura del Proyecto
 
 Aquí se detalla la estructura de directorios y archivos del proyecto.
 
-Generada mediante el comando `tree` de Bash.
+Generada mediante el comando `tree -I '.**/|tmp.txt|target|enunciado.pdf'` en Bash.
 ```bash
 .
+├── HELP.md
+├── mvnw
+├── mvnw.cmd
+├── pom.xml
 ├── README.md
-├── requirements.txt
 └── src
-    ├── app.py
-    ├── db
-    │   ├── connection.py
-    │   ├── __init__.py
-    │   ├── models.py
-    │   └── sql
-    │       ├── dummy-activities.sql
-    │       ├── region-comuna.sql
-    │       ├── tabla-comentario.sql
-    │       └── tarea2.sql
-    ├── forms
-    │   ├── activityform
-    │   │   ├── form.py
-    │   │   ├── __init__.py
-    │   │   └── processing.py
-    │   ├── commentform
-    │   │   ├── form.py
-    │   │   ├── __init__.py
-    │   │   └── processing.py
-    │   └── __init__.py
-    ├── static
-    │   ├── css
-    │   │   └── style.css
-    │   ├── js
-    │   │   ├── activities
-    │   │   │   ├── details.js
-    │   │   │   ├── list.js
-    │   │   │   └── upload_form.js
-    │   │   └── code.js
-    │   ├── media
-    │   │   └── placeholder.png
-    │   └── uploads
-    │       ├── cat_1.jpg
-    │       ├── cat_2.jpg
-    │       ├── cat_3.jpg
-    │       ├── cat_4.jpg
-    │       ├── cat_5.jpg
-    │       ├── cat_6.jpg
-    │       ├── cat_7.jpg
-    │       └── cat_8.jpg
-    └── templates
-        ├── activities
-        │   ├── details.html
-        │   ├── list.html
-        │   ├── _page.html
-        │   ├── stats.html
-        │   └── upload_form.html
-        ├── errors
-        │   ├── 400.html
-        │   └── 404.html
-        ├── index.html
-        └── layout.html
-                                                                                           
+    ├── main
+    │   ├── java
+    │   │   └── com
+    │   │       └── web
+    │   │           └── apps
+    │   │               └── tarea4
+    │   │                   ├── ActivityRepository.java
+    │   │                   └── Tarea4Application.java
+    │   └── resources
+    │       ├── application.properties
+    │       ├── static
+    │       │   ├── css
+    │       │   │   └── style.css
+    │       │   └── js
+    │       │       └── script.js
+    │       ├── templates
+    │       │   ├── _eval_tooltip.html
+    │       │   └── index.html
+    │       └── uploads
+    │           ├── cat_1.jpg
+    │           ├── cat_2.jpg
+    │           ├── cat_3.jpg
+    │           ├── cat_4.jpg
+    │           ├── cat_5.jpg
+    │           ├── cat_6.jpg
+    │           ├── cat_7.jpg
+    │           └── cat_8.jpg
+    └── test
+        └── java
+            └── com
+                └── web
+                    └── apps
+                        └── tarea4
+                            └── Tarea4ApplicationTests.java                                                              
 ```
 
 ## Decisiones de Diseño
 
-### Reorganización del código
-
-Reorganize el proyecto dado que ha aumentado la cantidad de templates, scripts y código de Python 
-para mejorar la estructura de directorios y mantener la legibilidad.
-
-### WTForms & Flask-WTF
-
-Para simplificar y estandarizar el proceso de validación de formularios, reestructure el código para utilizar WTForms.  
-De esta forma no me tengo que preocupar de hacer un proceso de validación para cada campo de cada formulario.
-
-### Formulario de Comentario
-
-Siguiendo la misma lógica de simplificar el manejo de formularios, los comentarios no incluyen un campo de fecha-hora  
-ya que esta se calcula al momento de subir el comentario a la base de datos. La razón es para evitar spoofing de la  
-fecha y garantizar que todas estarán basadas en el mismo punto de referencia, la hora del servidor al momento de  
-procesar el formulario.
-
-#### Dummy data
-
-Para probar que funciona el sistema de comentarios se extendió la información dummy para incluir comentarios.
-
-### Gráficos
-
-Para los gráficos utilicé la librería `chart.js` ya que estaba implementada de antes y la he utilizado en proyectos 
-anteriores por lo que me resultaba personalmente familiar.
-
-De manera similar, los gráficos ya se generaban con información de la base de datos en la versión anterior, por lo  
-que el cambio principal fue separar esa lógica de la ruta `/estadisticas`, moverla a la ruta `/api/actividades/stats`  
-y asegurar que el script interactúe con la nueva API de forma correcta.
-
-### Validación en Frontend & Backend
-
-Para mantener una cadena de validación coherente, los formularios no se envían al backend a menos que aprueben la 
-validación en frontend.  
-Es posible forzar enviar el formulario al backend para visualizar los mensajes de error que este genera llamando 
-la función `submitForm()` en la consola del navegador web.
-
-### Manejo de errores 400 y 404
-
-Se agregaron templates básicos para explícitamente manejar errores de tipo 400 y 404 causados por URLs 
-maliciosos o erróneos.
+- **Separación de responsabilidades:** Se implementó un repositorio (`ActivityRepository`) para encapsular el acceso a la base de datos, mejorando la seguridad y mantenibilidad del código.
+- **Validación robusta:** Tanto en el backend como en el frontend se valida que el puntaje ingresado sea un entero entre 1 y 7, mostrando mensajes de error claros al usuario si no se cumple esta condición.
+- **Frontend reactivo:** El frontend actualiza la tabla y el puntaje de manera dinámica usando JavaScript y AJAX, sin recargar la página.
+- **Uso de fragmentos:** Se utilizan fragmentos de Thymeleaf para mantener separada la definición del tooltip de la página principal.

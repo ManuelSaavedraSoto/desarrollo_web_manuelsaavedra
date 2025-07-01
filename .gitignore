@@ -35,3 +35,4 @@ build/
 ### Misc. ###
 enunciado.pdf
 .flask_src
+.sql
